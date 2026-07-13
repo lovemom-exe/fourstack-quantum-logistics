@@ -60,7 +60,7 @@ def benchmark_error(
     results_list = []
 
     for k in feature_list:
-        print("="*30)
+        print("="*40)
         print(f"[{k}] training:")
         selector = SelectKBest(score_func=mutual_info_regression, k=k)
         X_train_k = selector.fit_transform(X_train_all, y_train)
@@ -83,7 +83,7 @@ def benchmark_error(
         else:
             print("Fail")
             return
-
+        print("="*20)
         print("VQR: ", end="")
         model_vqr = vqr_train(X_train_k, y_train, k=k)
         if model_vqr is not None:

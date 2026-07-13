@@ -1,0 +1,16 @@
+# Input and Output Settings
+from: markdown
+to: pdf
+pdf-engine: xelatex
+
+# Document Styling (Fixes the small text & wide margins)
+variables:
+  geometry:
+    - margin=1in
+    - a4paper # Or letterpaper depending on your region
+  mainfont: "Arial" # Changes the default academic font to a modern clean font
+  fontsize: 11pt # Boosts base text size
+
+# Extra features
+# toc: true # Automatically generates a Table of Contents
+number-sections: true # Automatically numbers your headers (1, 1.1, etc.)

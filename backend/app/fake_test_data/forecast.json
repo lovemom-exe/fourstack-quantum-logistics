@@ -1,0 +1,10 @@
+[
+  {
+    "forecast_id": 1,
+    "date": "2026-02-01",
+    "sku_id": "SKU001",
+    "warehouse_id": "WH001",
+    "predicted_units": 210,
+    "confidence": 0.94
+  }
+]

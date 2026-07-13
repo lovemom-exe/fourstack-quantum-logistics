@@ -1,0 +1,34 @@
+[
+  {
+    "sale_id": 1,
+    "date": "2026-01-01",
+    "sku_id": "SKU001",
+    "warehouse_id": "WH001",
+    "promotion_flag": false,
+    "units_sold": 120
+  },
+  {
+    "sale_id": 2,
+    "date": "2026-01-02",
+    "sku_id": "SKU001",
+    "warehouse_id": "WH001",
+    "promotion_flag": true,
+    "units_sold": 180
+  },
+  {
+    "sale_id": 3,
+    "date": "2026-01-03",
+    "sku_id": "SKU002",
+    "warehouse_id": "WH002",
+    "promotion_flag": false,
+    "units_sold": 95
+  },
+  {
+    "sale_id": 4,
+    "date": "2026-01-04",
+    "sku_id": "SKU003",
+    "warehouse_id": "WH001",
+    "promotion_flag": false,
+    "units_sold": 150
+  }
+]

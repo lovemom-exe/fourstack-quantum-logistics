@@ -631,7 +631,7 @@ def main():
     # =============================================
 
     # ----------------------------------------------------------
-    # view(food_eval_df)
+    view(food_eval_df)
     # inspect(food_train_df, "precpt", greater=20, columns=["avg_temperature", "avg_humidity"])
     # inspect(food_train_df, "discount", less=0.2, columns=["sale_amount", "holiday_flag", "activity_flag"])
     # describe_feature(food_train_df, "sale_amount")

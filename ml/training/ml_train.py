@@ -111,7 +111,7 @@ def vqr_train(
     model = VQR(
         feature_map=featuremap,
         ansatz= ansatz,
-        optimizer=optimizer,    # type: ignore
+        # optimizer=optimizer,
         estimator=estimator,
     )
 

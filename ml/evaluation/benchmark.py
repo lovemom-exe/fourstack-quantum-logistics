@@ -84,6 +84,7 @@ def benchmark_error(
             print("Fail")
             return
 
+        print("VQR: ", end="")
         model_vqr = vqr_train(X_train_k, y_train, k=k)
         if model_vqr is not None:
             print("Done")

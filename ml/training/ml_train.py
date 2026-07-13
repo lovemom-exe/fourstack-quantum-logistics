@@ -99,7 +99,7 @@ def vqr_train(
 
     # Optimizer
     print("Optimizer: ", end="")
-    optimizer = COBYLA(maxiter=100).minimize
+    optimizer = COBYLA(maxiter=100)
     print('Done')
 
     # Estimator
@@ -111,7 +111,7 @@ def vqr_train(
     model = VQR(
         feature_map=featuremap,
         ansatz= ansatz,
-        # optimizer=optimizer,
+        optimizer=optimizer,
         estimator=estimator,
     )
 
@@ -145,3 +145,14 @@ def xgb_train(
 #==========================================================================
 # MAIN EXECUTION ENTRYPOINT
 #==========================================================================
+def main():
+    X_train_raw, y_train, X_test_raw, y_test = create_food_sample(n_sample=5000)
+    X_train_scaled, X_test_scaled = feature_scaler(X_train_raw, X_test_raw)
+    model = vqr_train(
+        X_train=X_train_scaled,
+        Y_train=y_train,
+        k = 4
+    )
+
+if __name__ == "__main__":
+    main()

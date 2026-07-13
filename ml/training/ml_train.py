@@ -116,7 +116,9 @@ def vqr_train(
     )
 
     # Fit Data
+    print("Fit Data: ", end="")
     model.fit(X_train, Y_train)
+    print("Done")
     return model
 
 

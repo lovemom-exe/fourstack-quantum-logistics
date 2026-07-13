@@ -88,16 +88,24 @@ def vqr_train(
         "Dataset's features don't equal to k!"
     )
     # Feature Map
+    print("Feature Map: ", end="")
     featuremap = ZZFeatureMap(feature_dimension=k, reps = 2)
+    print('Done')
 
     # Ansatz
+    print("Ansatz: ", end="")
     ansatz = RealAmplitudes(num_qubits=k, reps=2)
+    print('Done')
 
     # Optimizer
+    print("Optimizer: ", end="")
     optimizer = COBYLA(maxiter=100).minimize
+    print('Done')
 
     # Estimator
+    print("Estimator: ", end="")
     estimator = StatevectorEstimator()
+    print('Done')
 
     # Build Model
     model = VQR(

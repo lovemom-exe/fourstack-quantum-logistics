@@ -20,7 +20,7 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import MinMaxScaler
 from qiskit.circuit.library import zz_feature_map, real_amplitudes
-from qiskit_algorithms.optimizers import COBYLA
+from qiskit_machine_learning.optimizers import COBYLA
 from qiskit.primitives import StatevectorEstimator
 
 from qiskit_machine_learning.gradients import ParamShiftEstimatorGradient

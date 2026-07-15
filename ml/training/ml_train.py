@@ -169,7 +169,7 @@ def main():
     # print(type(featuremap))
     # print(type(ansatz))
     # print(type(estimator))
-    x_train_raw, y_train, x_test_raw, y_test = create_food_sample(n_sample=5000)
+    x_train_raw, y_train, x_test_raw, y_test = create_food_sample(n_sample=3000)
     x_train_scaled, x_test_scaled = feature_scaler(x_train_raw, x_test_raw)
     selection = SelectKBest(score_func=mutual_info_regression, k=4)
     X_train_new = selection.fit_transform(x_train_scaled, y_train)
@@ -183,12 +183,19 @@ def main():
     model = VQR(
         feature_map=featuremap,
         ansatz=ansatz,
+        optimizer=COBYLA(maxiter=100),
         estimator=estimator,
     )
     print("Before fit")
-    model.fit(X_train_new, y_train)
+    model.fit(X_train_new[:50], y_train[:50])
     print("After fit")
     print("After constructor")
+    y_pred = model.predict(X_test_new)
+
+    print(f"r2_score: {r2_score(y_test, y_pred)}")
+    print(f"mae: {mean_absolute_error(y_test, y_pred)}")
+    print(f"mse: {mean_squared_error(y_test, y_pred)}")
+    print(f"rmse: {root_mean_squared_error(y_test, y_pred)}")
 
     # model = vqr_train(
     #     X_train=X_train_new,
@@ -200,10 +207,6 @@ def main():
     #     return
     # y_pred = model.predict(X_test_new)
 
-    # print(f"r2_score: {r2_score(y_test, y_pred)}")
-    # print(f"mae: {mean_absolute_error(y_test, y_pred)}")
-    # print(f"mse: {mean_squared_error(y_test, y_pred)}")
-    # print(f"rmse: {root_mean_squared_error(y_test, y_pred)}")
 
 if __name__ == "__main__":
     main()

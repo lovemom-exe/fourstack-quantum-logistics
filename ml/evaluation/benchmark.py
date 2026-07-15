@@ -185,11 +185,7 @@ def benchmark_plots(csv_path: str) -> None:
 #==========================================================================
 
 def main():
-    X_train_raw, y_train, X_test_raw, y_test = create_food_sample(n_sample=5000)
-    # print(X_train_raw.shape)
-    # print(X_test_raw.shape)
-    # print(y_train.shape)
-    # print(y_test.shape)
+    X_train_raw, y_train, X_test_raw, y_test = create_food_sample(n_sample=100)
     X_train_scaled, X_test_scaled = feature_scaler(X_train_raw, X_test_raw)
 
     benchmark_error(

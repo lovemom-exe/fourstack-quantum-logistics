@@ -19,6 +19,9 @@ DATA_PATH = os.path.join(ROOT_PATH, "data")
 # Benchmark path
 BENCHMARK = os.path.join(ROOT_PATH, "evaluation/benchmark_data")
 
+# Training/evaluation_result
+TRAINING_EVA_RESULT = os.path.join(ROOT_PATH, "traning/evaluation_result")
+
 # Raw data path
 RAW_DATA_PATH = os.path.join(DATA_PATH, "raw")
 # Processed data path
@@ -82,6 +85,7 @@ REGIONAL_WAREHOUSE_PATH_FEATURE = os.path.join(
 )
 
 # ==========================================================================
-# Benchmark Data Path
+# Benchmark Data Path | Optimize result path
 # ==========================================================================
 BENCHMARK_FOOD = os.path.join(BENCHMARK, "food_model")
+VQR_TRAIN_RESULT = os.path.join(TRAINING_EVA_RESULT, "vqr.csv")

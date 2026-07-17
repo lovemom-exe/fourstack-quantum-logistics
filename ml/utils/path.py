@@ -20,7 +20,7 @@ DATA_PATH = os.path.join(ROOT_PATH, "data")
 BENCHMARK = os.path.join(ROOT_PATH, "evaluation/benchmark_data")
 
 # Training/evaluation_result
-TRAINING_EVA_RESULT = os.path.join(ROOT_PATH, "traning/evaluation_result")
+TRAINING_EVA_RESULT = os.path.join(ROOT_PATH, "training/evaluation_result")
 
 # Raw data path
 RAW_DATA_PATH = os.path.join(DATA_PATH, "raw")
@@ -63,7 +63,7 @@ REGIONAL_WAREHOUSE_PATH_PROCESS = os.path.join(
     PROCESSED_DATA_PATH, "regional_warehouse.csv"
 )
 # ==========================================================================
-# FEAATURE
+# FEAATURES
 # ==========================================================================
 # Fresh retail data path
 FRESH_RETAIL_EVAL_PATH_FEATURE = os.path.join(

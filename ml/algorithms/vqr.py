@@ -6,6 +6,7 @@
 # ==========================================================================
 
 import numpy as np
+import inspect
 
 from qiskit.circuit.library import zz_feature_map, real_amplitudes
 from qiskit_machine_learning.optimizers import COBYLA
@@ -34,24 +35,16 @@ def vqr(
     """
     assert X_train.shape[1] == k, "Dataset's features don't equal to k!"
     # Feature Map
-    print("Feature Map: ", end="")
     featuremap = zz_feature_map(feature_dimension=k, reps=2)
-    print("Done")
 
     # Ansatz
-    print("Ansatz: ", end="")
     ansatz = real_amplitudes(num_qubits=k, reps=2)
-    print("Done")
 
     # Optimizer
-    print("Optimizer: ", end="")
     optimizer = COBYLA(maxiter=100)
-    print("Done")
 
     # Estimator
-    print("Estimator: ", end="")
     estimator = StatevectorEstimator()
-    print("Done")
 
     # Build Model
     model = VQR(
@@ -66,3 +59,12 @@ def vqr(
     model.fit(X_train, Y_train)
     print("Done")
     return model
+
+
+# def main():
+#     estimator = StatevectorEstimator()
+#     print(inspect.signature(estimator.run))
+
+
+# if __name__ == "__main__":
+#     main()

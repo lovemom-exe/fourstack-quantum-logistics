@@ -17,12 +17,16 @@ import numpy as np
 from typing import Tuple, List
 
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.feature_selection import SelectKBest, mutual_info_regression
 from sklearn.metrics import (
     mean_absolute_error,
     mean_squared_error,
     root_mean_squared_error,
     r2_score,
 )
+from algorithms.xgboost import xgboost
+from algorithms.random_forest import random_forest
+from algorithms.k_nearest_n import knn
 
 # ==========================================================================
 # PARAMETERS
@@ -98,39 +102,51 @@ def write_csv(path: str, content: List = []) -> None:
 # ==========================================================================
 def main():
 
-    # # ----------------------------------------------------------
-    # # Create Sample: n = 10
-    # x_train_raw, y_train, x_test_raw, y_test = create_food_sample(n_sample=10)
+    # ----------------------------------------------------------
+    # Create Sample
+    n = 250000
+    x_train_raw, y_train, x_test_raw, y_test = create_food_sample(n_sample=n)
     # x_train_scaled, x_test_scaled = feature_scaler(x_train_raw, x_test_raw)
 
-    # # ----------------------------------------------------------
-    # # Select number of feature: k = 4
-    # selection = SelectKBest(score_func=mutual_info_regression, k=4)
-    # X_train_new = selection.fit_transform(x_train_scaled, y_train)
-    # X_test_new = selection.transform(x_test_scaled)
+    # ----------------------------------------------------------
+    # Select number of feature
+    k = 17
+    selection = SelectKBest(score_func=mutual_info_regression, k=k)
+    X_train_new = selection.fit_transform(x_train_raw, y_train)
+    X_test_new = selection.transform(x_test_raw)
 
-    # # ----------------------------------------------------------
-    # # Train model
+    # ----------------------------------------------------------
+    # Train model
+    # model = xgboost(X_train_new, y_train)
     # model = vqr_train(X_train=X_train_new, Y_train=y_train, k=4)
-    # if model is None:
-    #     print("not found model")
-    #     return
-    # # ----------------------------------------------------------
-    # # Prediction and Evalation
-    # if isinstance(X_test_new, np.ndarray):
-    #     y_pred = model.predict(X_test_new)
-    #     print("Model: VQR")
-    #     print("=" * 50)
-    #     print(f"R^2: {r2_score(y_pred, y_test)}")
-    #     print(f"MAE: {mean_absolute_error(y_pred, y_test)}")
-    #     print(f"MSE: {mean_squared_error(y_pred, y_test)}")
-    #     print(f"RMAE: {root_mean_squared_error(y_pred, y_test)}")
+    # model = random_forest(X_train_new, y_train)
+    model = knn(X_train_new, y_train)
+    if model is None:
+        print("not found model")
+        return
+    # ----------------------------------------------------------
+    # Prediction and Evalation
+    if isinstance(X_test_new, np.ndarray):
+        y_pred = model.predict(X_test_new)
+        print("Model: XGBoost")
+        print("=" * 50)
+        print(f"n = {n}, k = {k}")
+        print(f"R^2: {r2_score(y_test, y_pred)}")
+        print(f"MAE: {mean_absolute_error(y_test, y_pred)}")
+        print(f"MSE: {mean_squared_error(y_test, y_pred)}")
+        print(f"RMAE: {root_mean_squared_error(y_test, y_pred)}")
+        print(f"y_pred_1: {y_pred[0]}")
+        print(f"y_test_1: {y_test[0]}")
+        print(f"y_pred_2: {y_pred[10]}")
+        print(f"y_test_2: {y_test[10]}")
+        print(f"y_pred_3: {y_pred[20]}")
+        print(f"y_test_3: {y_test[20]}")
 
     # ----------------------------------------------------------
     # Write Data to CSV file
-    write_csv(
-        VQR_TRAIN_RESULT,
-    )
+    # write_csv(
+    #     VQR_TRAIN_RESULT,
+    # )
 
 
 if __name__ == "__main__":

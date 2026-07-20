@@ -1,38 +1,37 @@
 # ==========================================================================
 # Author: Hoang Anh Quan
-# Purpose: XGBoost Regression
+# Purpose: K-Nearest Neighbors Regressor
 # ==========================================================================
 # IMPORTS & MODULE LOADING
 # ==========================================================================
 
 import numpy as np
-from xgboost import XGBRegressor
+from sklearn.neighbors import KNeighborsRegressor
+
 
 # ==========================================================================
 # CORE LOGIC & FUNCTIONS
 # ==========================================================================
-
-
-def xgboost(
+def knn(
     X_train: np.ndarray,
     Y_train: np.ndarray,
-) -> XGBRegressor | None:
+) -> KNeighborsRegressor | None:
 
     if not isinstance(X_train, np.ndarray):
-        return
+        return None
+
     if not isinstance(Y_train, np.ndarray):
-        return
+        return None
 
     # Model
-    model = XGBRegressor(
-        n_estimators=1000,
-        learning_rate=0.03,
-        max_depth=8,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=42,
-        eval_metric="rmse",
+    model = KNeighborsRegressor(
+        n_neighbors=5,
+        weights="distance",
+        algorithm="auto",
+        p=2,
+        n_jobs=-1,
     )
 
     model.fit(X_train, Y_train)
+
     return model

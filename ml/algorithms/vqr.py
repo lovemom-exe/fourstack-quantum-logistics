@@ -6,12 +6,14 @@
 # ==========================================================================
 
 import numpy as np
-import inspect
+
+from algorithms.quapp_estimator import QuappEstimator
 
 from qiskit.circuit.library import zz_feature_map, real_amplitudes
 from qiskit_machine_learning.optimizers import COBYLA
 from qiskit_machine_learning.algorithms import VQR
 from qiskit.primitives import StatevectorEstimator
+from qiskit.qasm2 import dumps
 
 # ==========================================================================
 # CORE LOGIC & FUNCTIONS
@@ -44,7 +46,7 @@ def vqr(
     optimizer = COBYLA(maxiter=100)
 
     # Estimator
-    estimator = StatevectorEstimator()
+    estimator = QuappEstimator()
 
     # Build Model
     model = VQR(
@@ -55,16 +57,28 @@ def vqr(
     )
 
     # Fit Data
-    print("Fit Data: ", end="")
     model.fit(X_train, Y_train)
-    print("Done")
     return model
 
 
-# def main():
-#     estimator = StatevectorEstimator()
-#     print(inspect.signature(estimator.run))
+# ==========================================================================
+# MAIN EXECUTION ENTRYPOINT
+# ==========================================================================
 
 
-# if __name__ == "__main__":
-#     main()
+def main():
+    X = np.array(
+        [
+            [0.1, 0.2],
+            [0.2, 0.3],
+            [0.3, 0.4],
+            [0.4, 0.5],
+        ]
+    )
+
+    y = np.array([1.0, 2.0, 3.0, 4.0])
+    model = vqr(X, y, k=2)
+
+
+if __name__ == "__main__":
+    main()

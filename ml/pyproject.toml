@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "datasets>=5.0.0",
+    "httpx>=0.28.1",
     "matplotlib>=3.11.0",
     "pandas>=3.0.3",
     "qiskit>=2.5.0",

@@ -1,0 +1,153 @@
+@import "../index.css";
+
+/* ----- FOOTER ----- */
+.footer {
+    background: var(--ink);
+    color: var(--base);
+    padding: clamp(2.5rem, 5vw, 4rem) clamp(1rem, 4vw, 4rem);
+}
+
+.footer__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+/* Footer — Compact (landing / observer) */
+.footer--compact .footer__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer__left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.footer__logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.footer__links {
+    display: flex;
+    gap: 1.2rem;
+}
+
+.footer__links a {
+    font-size: var(--fs-micro);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.4;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.footer__links a:hover {
+    opacity: 1;
+    color: var(--safety);
+}
+
+/* Footer — Full (index page) */
+.footer__top {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--gap);
+    padding-bottom: clamp(3rem, 6vw, 6rem);
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+.footer__brand {
+    grid-column: span 5;
+}
+
+.footer__brand-name {
+    font-size: var(--fs-h2);
+    margin-bottom: 1.5rem;
+}
+
+.footer__brand-desc {
+    font-size: var(--fs-data);
+    opacity: 0.45;
+    line-height: 1.8;
+    max-width: 340px;
+}
+
+.footer__col {
+    grid-column: span 2;
+}
+
+.footer__col:last-child {
+    grid-column: span 3;
+}
+
+.footer__col-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--safety);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.footer__col a {
+    display: block;
+    font-size: var(--fs-data);
+    opacity: 0.5;
+    margin-bottom: 0.75rem;
+    transition: opacity 0.2s;
+}
+
+.footer__col a:hover {
+    opacity: 1;
+    color: var(--safety);
+}
+
+.footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.footer__copy {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.05em;
+}
+
+.footer__copy a {
+    color: var(--safety);
+    font-weight: 500;
+}
+
+.footer__copy a:hover {
+    text-decoration: underline;
+}
+
+.footer__back-top {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.4;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--base);
+    transition: opacity 0.2s;
+}
+
+.footer__back-top:hover {
+    opacity: 1;
+    color: var(--safety);
+}

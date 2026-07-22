@@ -1,0 +1,167 @@
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Palette */
+    --base: #FFFFFF;
+    --ink: #101010;
+    --safety: #17af15;
+    --muted: #888888;
+    --surface: #F5F5F0;
+    --term-bg: #101010;
+    --term-green: #00FF66;
+    --term-amber: #FFAA00;
+
+    /* Borders & Shadows */
+    --border: 4px solid var(--ink);
+    --border-thin: 1px solid var(--ink);
+    --border-hair: 1px solid rgba(0, 0, 0, 0.10);
+    --shadow: 8px 8px 0px var(--ink);
+    --shadow-safety: 8px 8px 0px var(--safety);
+    --shadow-hover: 4px 4px 0px var(--ink);
+
+    /* Type Scale */
+    --fs-hero: clamp(4rem, 14vw, 14rem);
+    --fs-h1: clamp(2.4rem, 5vw, 5rem);
+    --fs-h2: clamp(1.6rem, 3vw, 3rem);
+    --fs-h3: clamp(1.1rem, 1.6vw, 1.5rem);
+    --fs-body: clamp(0.9rem, 1.1vw, 1.1rem);
+    --fs-data: clamp(0.78rem, 0.9vw, 0.95rem);
+    --fs-micro: 0.62rem;
+    --fs-ticker: clamp(1.4rem, 2.5vw, 2.5rem);
+    --fs-stat: clamp(2.4rem, 5vw, 4.5rem);
+    --fs-spec-val: clamp(2rem, 4vw, 3.5rem);
+
+    /* Spacing */
+    --gap: clamp(1rem, 2vw, 2rem);
+    --section-pad: clamp(4rem, 10vw, 10rem) clamp(1rem, 4vw, 4rem);
+
+    /* Layout */
+    --cols: 12;
+    --header-h: 44px;
+}
+
+html {
+    scroll-behavior: smooth;
+    /* -webkit-text-size-adjust: 100%; */
+}
+
+body {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400;
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    color: var(--ink);
+    background-color: var(--base);
+    overflow-x: hidden;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+ul {
+    list-style: none;
+}
+
+::selection {
+    background: var(--safety);
+    color: var(--base);
+}
+
+/* ----- 2. BASE TYPOGRAPHY ----- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+}
+
+/* ----- BASE INPUT BUTTON ----- */
+input {
+    border: var(--border);
+    box-shadow: var(--shadow);
+    padding: clamp(1.2rem, 2vw, 2rem);
+    background: var(--base);
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    transition: none;
+    cursor: default;
+    overflow: hidden;
+    outline: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: var(--fs-data) * 5;
+    line-height: 1.7;
+}
+
+input:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px var(--ink);
+}
+
+
+/* ----- 3. UTILITY CLASSES ----- */
+.container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-inline: clamp(1rem, 4vw, 4rem);
+}
+
+.grid-12 {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    gap: var(--gap);
+}
+
+.accent {
+    color: var(--safety);
+}
+
+.tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 0.3em 0.7em;
+    border: 2px solid var(--ink);
+    background: var(--base);
+}
+
+.tag--filled {
+    background: var(--ink);
+    color: var(--base);
+}
+
+.tag--safety {
+    background: var(--safety);
+    color: var(--base);
+    border-color: var(--safety);
+}
+
+.tag--ghost {
+    border-color: var(--muted);
+    color: var(--muted);
+    background: transparent;
+}

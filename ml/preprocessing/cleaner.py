@@ -21,6 +21,7 @@ from utils.path import (
     # NATIONAL_CENTRAL_MEDICAL_STORE_PATH_PROCESS,
     REGIONAL_WAREHOUSE_PATH,
     # REGIONAL_WAREHOUSE_PATH_PROCESS,
+    PERISHABLE_GOODS_DATA,
 )
 
 # ==========================================================================
@@ -46,6 +47,9 @@ medical_district_df = pd.read_csv(DISTRICT_STORE_PATH)
 medical_central_store_df = pd.read_csv(NATIONAL_CENTRAL_MEDICAL_STORE_PATH)
 medical_region_df = pd.read_csv(REGIONAL_WAREHOUSE_PATH)
 
+# Perishable goods data
+perishable_good_data = pd.read_csv(PERISHABLE_GOODS_DATA)
+
 
 # ==========================================================================
 # CORE LOGIC & FUNCTIONS
@@ -60,19 +64,19 @@ def view(df: pd.DataFrame):
     print("INFO:")
     print(df.info(verbose=True))
     print("=" * 50)
-    # print(df.nunique())
+    print(df.nunique())
 
-    # print("=" * 50)
-    # print(f"SHAPE: {df.shape[0]} rows, {df.shape[1]} columns")
-    # print("=" * 50)
+    print("=" * 50)
+    print(f"SHAPE: {df.shape[0]} rows, {df.shape[1]} columns")
+    print("=" * 50)
 
-    # # Missing or Duplicate data report
-    # print("DUPLICATE DATA :")
-    # print("DUPLICATES: ", df.duplicated().sum())
+    # Missing or Duplicate data report
+    print("DUPLICATE DATA :")
+    print("DUPLICATES: ", df.duplicated().sum())
 
-    # missing_df = df.isnull().mean() * 100
-    # print(f"MISSING DATA PERCENTAGES:\n{missing_df}%")
-    # print("=" * 50)
+    missing_df = df.isnull().mean() * 100
+    print(f"MISSING DATA PERCENTAGES:\n{missing_df}%")
+    print("=" * 50)
 
 
 def encode_datetime(df: pd.DataFrame, column: str) -> None:
@@ -160,6 +164,11 @@ def main():
     # =============================================
 
     # view(food_eval_df)
+
+    # =============================================
+    # Cleanning Data: perishable goods data
+    # =============================================
+    view(perishable_good_data)
 
     # =============================================
     # Export to CSV

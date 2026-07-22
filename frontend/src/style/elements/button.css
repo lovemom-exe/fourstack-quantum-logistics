@@ -1,0 +1,45 @@
+@import "../index.css";
+
+/* ----- BUTTONS ----- */
+.btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.8em 2em;
+    border: var(--border);
+    cursor: pointer;
+    transition: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn--primary {
+    background: var(--safety);
+    color: var(--base);
+    box-shadow: var(--shadow);
+}
+
+.btn--primary:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px var(--ink);
+}
+
+.btn--primary:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--ink);
+}
+
+.btn--ghost {
+    background: var(--base);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+}
+
+.btn--ghost:hover {
+    background: var(--ink);
+    color: var(--base);
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px var(--ink);
+}

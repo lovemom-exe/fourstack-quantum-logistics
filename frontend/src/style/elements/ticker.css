@@ -1,0 +1,55 @@
+@import "../index.css";
+
+/* ----- TICKER ----- */
+.ticker {
+    border-bottom: var(--border);
+    background: var(--ink);
+    color: var(--base);
+    overflow: hidden;
+    padding: 1.2rem 0;
+}
+
+.ticker--safety {
+    background: var(--safety);
+}
+
+.ticker--safety .ticker__item::after {
+    background: var(--base);
+}
+
+.ticker__track {
+    display: flex;
+    width: max-content;
+    animation: tickerScroll 20s linear infinite;
+}
+
+.ticker--reverse .ticker__track {
+    animation-direction: reverse;
+    animation-duration: 28s;
+}
+
+.ticker__item {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: var(--fs-ticker);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.ticker__item::after {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background: var(--safety);
+    flex-shrink: 0;
+}
+
+@keyframes tickerScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}

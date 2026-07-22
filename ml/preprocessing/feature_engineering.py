@@ -22,6 +22,7 @@ from utils.path import (
     FRESH_RETAIL_EVAL_PATH_PROCESS,
     FRESH_RETAIL_TRAIN_PATH_FEATURE,
     FRESH_RETAIL_TRAIN_PATH_PROCESS,
+    PERISHABLE_GOODS_DATA,
     # NATIONAL_CENTRAL_MEDICAL_STORE_PATH_FEATURE,
     # NATIONAL_CENTRAL_MEDICAL_STORE_PATH_PROCESS,
     # REGIONAL_WAREHOUSE_PATH_FEATURE,
@@ -52,6 +53,9 @@ food_eval_df = pd.read_csv(food_eval)
 # medical_district_df = pd.read_csv(medical_district)
 # medical_central_store_df = pd.read_csv(medical_central_store)
 # medical_region_df = pd.read_csv(medical_region)
+
+# perishable goods data
+perishable_goods_data = pd.read_csv(PERISHABLE_GOODS_DATA)
 
 # ==========================================================================
 # CORE LOGIC & FUNCTIONS
@@ -103,6 +107,7 @@ def drop_columns(df: pd.DataFrame, columns: list[str]) -> None:
     if missing:
         print(f"[I] Ignored missing column(s): {missing}")
 
+
 # Inspect rows
 def inspect(
     df: pd.DataFrame,
@@ -153,6 +158,7 @@ def inspect(
 
     print(df.loc[mask, columns])
 
+
 # Describe a feature
 def describe_feature(
     df: pd.DataFrame,
@@ -171,53 +177,55 @@ def describe_feature(
 
     s = df[column]
 
-    print('=' * 40)
-    print(f'FEATURE: {column}')
-    print('=' * 40)
+    print("=" * 40)
+    print(f"FEATURE: {column}")
+    print("=" * 40)
 
-    print(f'Dtype           : {s.dtype}')
-    print(f'Shape           : {len(s):,}')
-    print(f'Missing         : {s.isna().sum():,} ({100 * s.isna().mean():.2f}%)')
-    print(f'Duplicates      : {s.duplicated().sum():,}')
-    print(f'Unique          : {s.nunique():,}')
+    print(f"Dtype           : {s.dtype}")
+    print(f"Shape           : {len(s):,}")
+    print(f"Missing         : {s.isna().sum():,} ({100 * s.isna().mean():.2f}%)")
+    print(f"Duplicates      : {s.duplicated().sum():,}")
+    print(f"Unique          : {s.nunique():,}")
 
     if is_numeric_dtype(s):
         print()
-        print('STATISTICS')
-        print('-' * 40)
+        print("STATISTICS")
+        print("-" * 40)
         print(s.describe())
 
         print()
-        print(f'Skewness        : {s.skew():.4f}')
-        print(f'Kurtosis        : {s.kurtosis():.4f}')
+        print(f"Skewness        : {s.skew():.4f}")
+        print(f"Kurtosis        : {s.kurtosis():.4f}")
 
         print()
-        print('LARGEST VALUES')
-        print('-' * 40)
+        print("LARGEST VALUES")
+        print("-" * 40)
         print(df.nlargest(top_n, column))
 
         print()
-        print('SMALLEST VALUES')
-        print('-' * 40)
+        print("SMALLEST VALUES")
+        print("-" * 40)
         print(df.nsmallest(top_n, column))
 
     else:
         print()
-        print('TOP VALUE COUNTS')
-        print('-' * 40)
+        print("TOP VALUE COUNTS")
+        print("-" * 40)
         print(s.value_counts(dropna=False).head(top_n))
 
     print()
-    print('FIRST SAMPLE')
-    print('-' * 40)
+    print("FIRST SAMPLE")
+    print("-" * 40)
     print(json.dumps(df.iloc[0].to_dict(), indent=4, default=str))
 
     print()
-    print(f'RANDOM {sample_n} ROWS')
-    print('-' * 50)
+    print(f"RANDOM {sample_n} ROWS")
+    print("-" * 50)
     print(df.sample(min(sample_n, len(df))))
 
-    print('=' * 40)
+    print("=" * 40)
+
+
 def encode_array(df: pd.DataFrame, column: str, from_string: bool = True) -> None:
     """
     Convert a dataframe column containing lists (or list strings)
@@ -226,14 +234,15 @@ def encode_array(df: pd.DataFrame, column: str, from_string: bool = True) -> Non
     """
 
     if from_string:
+
         def parse(x):
             if pd.isna(x):
                 return np.array([])
 
-            x = str(x).strip().strip('[]')
+            x = str(x).strip().strip("[]")
 
             # Split by commas OR any whitespace (space, tab, newline)
-            tokens = re.split(r'[\s,]+', x)
+            tokens = re.split(r"[\s,]+", x)
 
             return np.array([float(i) for i in tokens if i])
 
@@ -242,12 +251,24 @@ def encode_array(df: pd.DataFrame, column: str, from_string: bool = True) -> Non
     else:
         df[column] = df[column].apply(np.array)
 
-def decode_list(
-    df: pd.DataFrame,
-    stock_column: str):
-    '''
+
+def export_csv(df: pd.DataFrame, filename: str, index: bool = False) -> None:
+    """
+    Export a DataFrame to a CSV file.
+    """
+    df.to_csv(filename, index=index)
+    print(f"[DONE] Data exported to '{filename}'")
+
+
+# ==========================================================================
+# FRESH RETAIL
+# ==========================================================================
+
+
+def decode_list(df: pd.DataFrame, stock_column: str):
+    """
     FRESH RETAIL DATASET ONLY
-    '''
+    """
     if not isinstance(df[stock_column].iloc[0], np.ndarray):
         try:
             encode_array(df, stock_column)
@@ -264,10 +285,7 @@ def decode_list(
 
     df["stockout_hours"] = stock.sum(axis=1)
 
-    df["stockout_ratio"] = (
-        df["stockout_hours"] / 24
-    )
-
+    df["stockout_ratio"] = df["stockout_hours"] / 24
 
     def longest_stockout(arr):
         longest = current = 0
@@ -281,25 +299,16 @@ def decode_list(
 
         return longest
 
-    df["longest_stockout"] = df[stock_column].apply(
-        longest_stockout
-    )
+    df["longest_stockout"] = df[stock_column].apply(longest_stockout)
 
-    df["first_stockout_hour"] = np.where(
-        mask.any(axis=1),
-        mask.argmax(axis=1),
-        -1
-    )
+    df["first_stockout_hour"] = np.where(mask.any(axis=1), mask.argmax(axis=1), -1)
 
     rev = np.flip(mask, axis=1)
 
-    df["last_stockout_hour"] = np.where(
-        mask.any(axis=1),
-        23 - rev.argmax(axis=1),
-        -1
-    )
+    df["last_stockout_hour"] = np.where(mask.any(axis=1), 23 - rev.argmax(axis=1), -1)
 
-    df["business_stockout"] = stock[:,8:18].sum(axis=1)
+    df["business_stockout"] = stock[:, 8:18].sum(axis=1)
+
 
 def engineer_interaction_features(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -322,54 +331,43 @@ def engineer_interaction_features(df: pd.DataFrame) -> pd.DataFrame:
     # Promotion × Stock
     # ----------------------------------------------------------
 
-    df["discount_stockout_ratio"] = (
-        df["discount"] * df["stockout_ratio"]
-    )
+    df["discount_stockout_ratio"] = df["discount"] * df["stockout_ratio"]
 
-    df["discount_stock_hour6_22_cnt"] = (
-        df["discount"] * df["stock_hour6_22_cnt"]
-    )
+    df["discount_stock_hour6_22_cnt"] = df["discount"] * df["stock_hour6_22_cnt"]
 
-    df["discount_business_stockout"] = (
-        df["discount"] * df["business_stockout"]
-    )
+    df["discount_business_stockout"] = df["discount"] * df["business_stockout"]
 
     # ----------------------------------------------------------
     # Calendar × Stock
     # ----------------------------------------------------------
 
-    df["holiday_stockout_ratio"] = (
-        df["holiday_flag"] * df["stockout_ratio"]
-    )
+    df["holiday_stockout_ratio"] = df["holiday_flag"] * df["stockout_ratio"]
 
-    df["activity_stockout_ratio"] = (
-        df["activity_flag"] * df["stockout_ratio"]
-    )
+    df["activity_stockout_ratio"] = df["activity_flag"] * df["stockout_ratio"]
 
     # ----------------------------------------------------------
     # Weather
     # ----------------------------------------------------------
 
-    df["bad_weather"] = (
-        df["precpt"] * df["avg_humidity"]
-    )
+    df["bad_weather"] = df["precpt"] * df["avg_humidity"]
 
     # ----------------------------------------------------------
     # Weekend
     # ----------------------------------------------------------
 
-    df["is_weekend"] = (
-        df["day_of_week"] >= 5
-    ).astype(np.int8)
+    df["is_weekend"] = (df["day_of_week"] >= 5).astype(np.int8)
 
     return df
 
-def export_csv(df: pd.DataFrame, filename: str, index: bool = False) -> None:
-    """
-    Export a DataFrame to a CSV file.
-    """
-    df.to_csv(filename, index=index)
-    print(f"[DONE] Data exported to '{filename}'")
+
+# ==========================================================================
+# Perishable Goods Feature
+# ==========================================================================
+def perishable_new_feature():
+    # perishable_goods_data["category"]
+    pass
+
+
 # ==========================================================================
 # PLOT / STYLE PLOT
 # ==========================================================================
@@ -420,6 +418,7 @@ def plot_histogram(df: pd.DataFrame, columns: list[str], bins: int = 30) -> None
     plt.tight_layout()
     plt.show()
 
+
 def plot_boxplot(df: pd.DataFrame, columns: list[str]) -> None:
     """
     Plot box plots for multiple numerical columns.
@@ -431,35 +430,27 @@ def plot_boxplot(df: pd.DataFrame, columns: list[str]) -> None:
     cols = 3
     rows = math.ceil(n / cols)
 
-    fig, axes = plt.subplots(
-        rows,
-        cols,
-        figsize=(6 * cols, 3 * rows)
-    )
+    fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 3 * rows))
 
     axes = np.array(axes).flatten()
 
     for ax, column in zip(axes, columns):
-        sns.boxplot(
-            x=df[column],
-            ax=ax,
-            color="#ebc564",
-            linewidth=1.5
-        )
+        sns.boxplot(x=df[column], ax=ax, color="#ebc564", linewidth=1.5)
 
         ax.set_title(column)
         ax.set_xlabel(column)
 
-    for ax in axes[len(columns):]:
+    for ax in axes[len(columns) :]:
         fig.delaxes(ax)
 
     plt.tight_layout()
     plt.show()
 
+
 def plot_correlation(
     df: pd.DataFrame,
     columns: list[str] | None = None,
-    method: Literal["pearson", "spearman", "kendall"]="pearson",
+    method: Literal["pearson", "spearman", "kendall"] = "pearson",
 ) -> None:
     """
     Plot a lower-triangle correlation heatmap.
@@ -475,7 +466,7 @@ def plot_correlation(
     if columns is None:
         corr = df.corr(numeric_only=True, method=method)
     else:
-        corr = df[columns].corr(method=method) # type: ignore
+        corr = df[columns].corr(method=method)  # type: ignore
 
     mask = np.triu(np.ones_like(corr, dtype=bool))
 
@@ -491,7 +482,7 @@ def plot_correlation(
         square=True,
         linewidths=0.5,
         linecolor="#101010",
-        cbar_kws={"shrink": 0.8}
+        cbar_kws={"shrink": 0.8},
     )
 
     plt.title(f"Correlation Heatmap ({method.title()})")
@@ -500,6 +491,7 @@ def plot_correlation(
 
     plt.tight_layout()
     plt.show()
+
 
 def plot_scatter(
     df: pd.DataFrame,
@@ -517,11 +509,7 @@ def plot_scatter(
     cols = 3
     rows = math.ceil(n / cols)
 
-    fig, axes = plt.subplots(
-        rows,
-        cols,
-        figsize=(6 * cols, 4 * rows)
-    )
+    fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 4 * rows))
 
     axes = np.array(axes).flatten()
 
@@ -540,11 +528,13 @@ def plot_scatter(
         ax.set_xlabel(column)
         ax.set_ylabel(target)
 
-    for ax in axes[len(columns):]:
+    for ax in axes[len(columns) :]:
         fig.delaxes(ax)
 
     plt.tight_layout()
     plt.show()
+
+
 # ==========================================================================
 # MAIN EXECUTION ENTRYPOINT
 # ==========================================================================
@@ -553,50 +543,56 @@ def main():
     # Feature Engineering: food_eval and food_train
     # ----------------------------------------------------------
 
-    decode_list(food_eval_df, "hours_stock_status")
-    engineer_interaction_features(food_eval_df)
-    decode_list(food_train_df, "hours_stock_status")
-    engineer_interaction_features(food_train_df)
-    # Drop Column
-    drop_columns(food_eval_df, [
-        "dt",
-        "hour",
-        "day_of_week",
-        "day",
-        "month",
-        "hour_sin",
-        "hour_cos",
-        "city_id",
-        "store_id",
-        "management_group_id",
-        "first_category_id",
-        "second_category_id",
-        "third_category_id",
-        "product_id",
-        "hours_sale",
-        "hours_stock_status"
-    ])
-    drop_columns(food_train_df, [
-        "dt",
-        "hour",
-        "day_of_week",
-        "day",
-        "month",
-        "hour_sin",
-        "hour_cos",
-        "city_id",
-        "store_id",
-        "management_group_id",
-        "first_category_id",
-        "second_category_id",
-        "third_category_id",
-        "product_id",
-        "hours_sale",
-        "hours_stock_status"
-    ])
+    # decode_list(food_eval_df, "hours_stock_status")
+    # engineer_interaction_features(food_eval_df)
+    # decode_list(food_train_df, "hours_stock_status")
+    # engineer_interaction_features(food_train_df)
+    # # Drop Column
+    # drop_columns(
+    #     food_eval_df,
+    #     [
+    #         "dt",
+    #         "hour",
+    #         "day_of_week",
+    #         "day",
+    #         "month",
+    #         "hour_sin",
+    #         "hour_cos",
+    #         "city_id",
+    #         "store_id",
+    #         "management_group_id",
+    #         "first_category_id",
+    #         "second_category_id",
+    #         "third_category_id",
+    #         "product_id",
+    #         "hours_sale",
+    #         "hours_stock_status",
+    #     ],
+    # )
+    # drop_columns(
+    #     food_train_df,
+    #     [
+    #         "dt",
+    #         "hour",
+    #         "day_of_week",
+    #         "day",
+    #         "month",
+    #         "hour_sin",
+    #         "hour_cos",
+    #         "city_id",
+    #         "store_id",
+    #         "management_group_id",
+    #         "first_category_id",
+    #         "second_category_id",
+    #         "third_category_id",
+    #         "product_id",
+    #         "hours_sale",
+    #         "hours_stock_status",
+    #     ],
+    # )
 
     # ----------------------------------------------------------
-    # # Histogram
+    # Histogram
     # plot_histogram(
     #     food_train_df,
     #     [
@@ -609,8 +605,8 @@ def main():
     #     ],
     # )
 
-    # # [NOTE] For training Neural Network or Linear Model...
-    # # "sale_amount" and "precpt" is skew_right and the tail is to long, so i apply numpy.log1p() for this feature
+    # [NOTE] For training Neural Network or Linear Model...
+    # "sale_amount" and "precpt" is skew_right and the tail is to long, so i apply numpy.log1p() for this feature
     # food_train_df["sale_amount"] = np.log1p(food_train_df["sale_amount"])
     # food_train_df["precpt"] = np.log1p(food_train_df["precpt"])
 
@@ -626,17 +622,62 @@ def main():
     # Scatter Plot
     # plot_scatter(food_train_df, "sale_amount", ["stock_hour6_22_cnt","discount", "precpt", "holiday_flag","activity_flag", "avg_temperature", "avg_humidity", "avg_wind_level","day_sin", "day_cos", "day_sin_month", "day_cos_month", "month_sin", "month_cos"])
 
-    # =============================================
-    # Feature Engineering: medical
-    # =============================================
+    # ----------------------------------------------------------
+    # Feature Engineering: Perishable Goods Data
+    # ----------------------------------------------------------
+    drop_columns(
+        perishable_goods_data,
+        [
+            "record_id",
+            "product_id",
+            "product_name",
+            "store_id",
+            "supplier_id",
+        ],
+    )
 
     # ----------------------------------------------------------
-    view(food_eval_df)
-    # inspect(food_train_df, "precpt", greater=20, columns=["avg_temperature", "avg_humidity"])
-    # inspect(food_train_df, "discount", less=0.2, columns=["sale_amount", "holiday_flag", "activity_flag"])
-    # describe_feature(food_train_df, "sale_amount")
-    # export_csv(food_eval_df, FRESH_RETAIL_EVAL_PATH_FEATURE)
-    # export_csv(food_train_df, FRESH_RETAIL_TRAIN_PATH_FEATURE)
+    # view(perishable_goods_data)
+    # plot_histogram(
+    #     perishable_goods_data,
+    #     [
+    #         "profit_margin_pct",
+    #         "supplier_score",
+    #         "is_promoted",
+    #     ],
+    # )
+
+    plot_correlation(
+        perishable_goods_data,
+        [
+            "daily_demand",
+            "demand_variability",
+            "shelf_life_days",
+            "days_remaining_at_purchase",
+            "storage_temp",
+            "temp_deviation",
+            "base_price",
+            "cost_price",
+            "initial_quantity",
+            "spoilage_sensitivity",
+            "is_weekend",
+            "temp_abuse_events",
+            "distribution_hours",
+            "handling_score",
+            "packaging_score",
+            "spoilage_risk",
+            "was_spoiled",
+            "days_until_expiry",
+            "discount_pct",
+            "selling_price",
+            "units_sold",
+            "units_wasted",
+            "waste_pct",
+            "waste_cost",
+            "profit",
+            "is_promoted",
+        ],
+    )
 
 
 if __name__ == "__main__":

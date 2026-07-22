@@ -1,0 +1,159 @@
+@import "../index.css";
+
+/* ----- BENTO CARD BASE ----- */
+.bento__grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(180px, auto);
+    gap: var(--gap);
+}
+
+.bento-card {
+    border: var(--border);
+    box-shadow: var(--shadow);
+    padding: clamp(1.2rem, 2vw, 2rem);
+    background: var(--base);
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    transition: none;
+    cursor: default;
+    overflow: hidden;
+}
+
+.bento-card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px var(--ink);
+}
+
+.bento-card__nonshadow {
+    border: var(--border);
+    /* box-shadow: var(--shadow); */
+    padding: clamp(1.2rem, 2vw, 2rem);
+    background: var(--base);
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    transition: none;
+    cursor: default;
+    overflow: hidden;
+    margin: clamp(1.2rem, 2vw, 2rem);
+}
+.bento-card__nonshadow:hover {
+    transform: translate(-4px, -4px);
+}
+
+.bento-card__visual {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    opacity: 0.08;
+}
+/* ----- GRID LAYOUT ----- */
+.bento-card--wide    { grid-column: span 8; }
+.bento-card--mid     { grid-column: span 6; }
+.bento-card--narrow  { grid-column: span 4; }
+.bento-card--tall    { grid-row: span 2; }
+
+/* ----- CARD STYLES ----- */
+
+.bento-card--dark {
+    background: var(--ink);
+    color: var(--base);
+    box-shadow: var(--shadow-safety);
+}
+
+.bento-card--dark:hover {
+    box-shadow: 12px 12px 0px var(--safety);
+}
+
+.bento-card--safety {
+    background: var(--safety);
+    color: var(--base);
+}
+
+.bento-card--safety:hover {
+    box-shadow: 12px 12px 0px var(--ink);
+}
+
+/* ----- ELEMENTS STYLES ----- */
+
+.bento-card__number {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.bento-card__title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: var(--fs-h3);
+    margin-bottom: 0.6rem;
+    line-height: 0.9;
+}
+
+.bento-card__text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: var(--fs-data);
+    line-height: 1.7;
+    opacity: 0.55;
+}
+
+.bento-card__stat {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    align-self: end;
+}
+
+/* Stat Card */
+.stat-card {
+    border: var(--border);
+    padding: clamp(1.2rem, 2vw, 2rem);
+    background: var(--base);
+    box-shadow: var(--shadow);
+    transition: none;
+}
+
+.stat-card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px var(--ink);
+}
+
+.stat-card--dark {
+    background: var(--ink);
+    color: var(--base);
+    box-shadow: var(--shadow-safety);
+}
+
+.stat-card--dark:hover { box-shadow: 12px 12px 0px var(--safety); }
+
+.stat-card__label {
+    font-size: var(--fs-micro);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    opacity: 0.4;
+    margin-bottom: 0.8rem;
+}
+
+.stat-card__value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: var(--fs-spec-val);
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.stat-card__unit {
+    font-size: 0.4em;
+    opacity: 0.5;
+    margin-left: 0.1em;
+}

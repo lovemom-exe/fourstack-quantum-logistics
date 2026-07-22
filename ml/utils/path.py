@@ -43,6 +43,9 @@ NATIONAL_CENTRAL_MEDICAL_STORE_PATH = os.path.join(
     RAW_DATA_PATH, "national_central_medical_store.csv"
 )
 REGIONAL_WAREHOUSE_PATH = os.path.join(RAW_DATA_PATH, "regional_warehouse.csv")
+
+#
+PERISHABLE_GOODS_DATA = os.path.join(RAW_DATA_PATH, "perishable_goods_management.csv")
 # ==========================================================================
 # PROCESSED
 # ==========================================================================
@@ -89,3 +92,26 @@ REGIONAL_WAREHOUSE_PATH_FEATURE = os.path.join(
 # ==========================================================================
 BENCHMARK_FOOD = os.path.join(BENCHMARK, "food_model")
 VQR_TRAIN_RESULT = os.path.join(TRAINING_EVA_RESULT, "vqr.csv")
+
+
+# ==========================================================================
+# Benchmark Data Path | Optimize result path
+# ==========================================================================
+
+
+# ==========================================================================
+# Test: DOES THE DATAPATH IS EXIST
+# ==========================================================================
+
+TEST_PATH = PERISHABLE_GOODS_DATA
+
+
+def main():
+    if os.path.exists(TEST_PATH):
+        print(TEST_PATH)
+    else:
+        return
+
+
+if __name__ == "__main__":
+    main()

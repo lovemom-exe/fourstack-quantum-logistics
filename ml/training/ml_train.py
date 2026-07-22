@@ -104,13 +104,13 @@ def main():
 
     # ----------------------------------------------------------
     # Create Sample
-    n = 250000
+    n = 100
     x_train_raw, y_train, x_test_raw, y_test = create_food_sample(n_sample=n)
     # x_train_scaled, x_test_scaled = feature_scaler(x_train_raw, x_test_raw)
 
     # ----------------------------------------------------------
     # Select number of feature
-    k = 17
+    k = 4
     selection = SelectKBest(score_func=mutual_info_regression, k=k)
     X_train_new = selection.fit_transform(x_train_raw, y_train)
     X_test_new = selection.transform(x_test_raw)
@@ -144,9 +144,9 @@ def main():
 
     # ----------------------------------------------------------
     # Write Data to CSV file
-    # write_csv(
-    #     VQR_TRAIN_RESULT,
-    # )
+    write_csv(
+        VQR_TRAIN_RESULT,
+    )
 
 
 if __name__ == "__main__":

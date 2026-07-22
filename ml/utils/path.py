@@ -102,6 +102,7 @@ VQR_TRAIN_RESULT = os.path.join(TRAINING_EVA_RESULT, "vqr.csv")
 # REFRESH ACCESS KEY
 # ==========================================================================
 ACCESS_TOKEN_PATH = os.path.join(ROOT_PATH, "access_token.csv")
+REFRESH_TOKEN_PATH = os.path.join(ROOT_PATH, "refresh_token.csv")
 
 # ==========================================================================
 # Test: DOES THE DATAPATH IS EXIST

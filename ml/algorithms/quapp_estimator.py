@@ -8,8 +8,8 @@ from qiskit.qasm2 import dumps
 
 import time
 import httpx
-from dotenv import find_dotenv, dotenv_values
 
+from utils.path import ACCESS_TOKEN_PATH
 from utils.api_util import (
     function_name,
     project_id,
@@ -21,11 +21,8 @@ from utils.api_util import (
 # ==========================================================================
 # PARAMETERS
 # ==========================================================================
-env_path = find_dotenv()
-config = dotenv_values(env_path)
-ACCESS_TOKEN = config.get("ACCESS_TOKEN")
-if ACCESS_TOKEN is None:
-    ACCESS_TOKEN = ""
+with open(ACCESS_TOKEN_PATH, "r") as access_token:
+    ACCESS_TOKEN = access_token.read()
 func_name = function_name
 prj_id = project_id
 dev_id = device_id
@@ -96,6 +93,8 @@ class QuappEstimator:
             "/api/v1/third-party/function/invoke", json=json_data
         )
         response.raise_for_status()
+        if "data" not in response.json():
+            raise RuntimeError(response.json())
 
         return response.json()["data"]
 
@@ -112,7 +111,7 @@ class QuappEstimator:
             dict: the "data" in json format
         """
         while True:
-            response = self.client.get(f"/v1/third-party/jobs/{jobId}/detail")
+            response = self.client.get(f"api/v1/third-party/jobs/{jobId}/detail")
             response.raise_for_status()
 
             data = response.json()["data"]
@@ -153,3 +152,10 @@ class QuappEstimator:
 # ==========================================================================
 # MAIN EXECUTION ENTRYPOINT
 # ==========================================================================
+def main():
+    # print(ACCESS_TOKEN)
+    pass
+
+
+if __name__ == "__main__":
+    main()

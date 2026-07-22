@@ -4,10 +4,9 @@
 # ==========================================================================
 # IMPORTS & MODULE LOADING
 # ==========================================================================
-from dotenv import find_dotenv, dotenv_values
 import httpx
 
-from utils.path import ACCESS_TOKEN_PATH
+from utils.path import ACCESS_TOKEN_PATH, REFRESH_TOKEN_PATH
 from utils.api_util import (
     base_url,
 )
@@ -15,11 +14,9 @@ from utils.api_util import (
 # ==========================================================================
 # PARAMETERS
 # ==========================================================================
-env_path = find_dotenv()
-config = dotenv_values(env_path)
-REFRESH_TOKEN = config.get("REFRESH_TOKEN")
-if REFRESH_TOKEN is None:
-    REFRESH_TOKEN = ""
+
+with open(REFRESH_TOKEN_PATH, "r") as token:
+    REFRESH_TOKEN = token.read().strip()
 
 base_url = base_url
 
@@ -31,7 +28,7 @@ base_url = base_url
 
 class RefreshToken:
     def __init__(self, refresh_token: str = REFRESH_TOKEN):
-        header = {}
+        header = {"Content-Type": "application/json"}
         self.token = refresh_token
         self.client = httpx.Client(
             base_url=base_url,
@@ -42,11 +39,36 @@ class RefreshToken:
         body = {"refreshToken": self.token}
 
         response = self.client.post(
-            url="/v2/tokens/refresh",
+            url="/api/v2/tokens/refresh",
             json=body,
         )
+
+        response.raise_for_status()
+        # print(response.status_code)
+        # print(response.headers)
+        # print(response.text)
+        new_access_token = response.json()["accessToken"]
+        new_refresh_token = response.json()["refreshToken"]
+
+        self._save(new_access_token, new_refresh_token)
+
+    def _save(self, access_key: str, refresh_token: str):
+        with open(ACCESS_TOKEN_PATH, "w") as file:
+            file.write(access_key)
+
+        with open(REFRESH_TOKEN_PATH, "w") as file:
+            file.write(refresh_token)
 
 
 # ==========================================================================
 # MAIN EXECUTION ENTRYPOINT
 # ==========================================================================
+
+
+def main():
+    re_token = RefreshToken()
+    re_token.refresh()
+
+
+if __name__ == "__main__":
+    main()

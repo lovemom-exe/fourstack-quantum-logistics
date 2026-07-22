@@ -98,12 +98,16 @@ VQR_TRAIN_RESULT = os.path.join(TRAINING_EVA_RESULT, "vqr.csv")
 # Benchmark Data Path | Optimize result path
 # ==========================================================================
 
+# ==========================================================================
+# REFRESH ACCESS KEY
+# ==========================================================================
+ACCESS_TOKEN_PATH = os.path.join(ROOT_PATH, "access_token.csv")
 
 # ==========================================================================
 # Test: DOES THE DATAPATH IS EXIST
 # ==========================================================================
 
-TEST_PATH = PERISHABLE_GOODS_DATA
+TEST_PATH = ACCESS_TOKEN_PATH
 
 
 def main():

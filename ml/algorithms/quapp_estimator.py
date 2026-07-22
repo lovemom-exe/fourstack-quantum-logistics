@@ -10,6 +10,14 @@ import time
 import httpx
 from dotenv import find_dotenv, dotenv_values
 
+from utils.api_util import (
+    function_name,
+    project_id,
+    device_id,
+    shots,
+    workspace_id,
+)
+
 # ==========================================================================
 # PARAMETERS
 # ==========================================================================
@@ -18,12 +26,10 @@ config = dotenv_values(env_path)
 ACCESS_TOKEN = config.get("ACCESS_TOKEN")
 if ACCESS_TOKEN is None:
     ACCESS_TOKEN = ""
-REFRESH_TOKEN = config.get("REFRESH_TOKEN")
-func_name = "test2"
-prj_id = "566"
-dev_id = 675
-shots = 1024
-workspace_id = "ws_seaquantathon2026"
+func_name = function_name
+prj_id = project_id
+dev_id = device_id
+shots = shots
 
 
 # ==========================================================================

@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: XGBoost same-day "nowcasting" baseline for sale_amount.
 #
 #          NOTE: several engineered features (stockout ratio, stock-hour

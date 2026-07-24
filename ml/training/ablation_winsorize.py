@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: PART 1 - isolate the effect of target winsorization.
 #
 #          Two target protocols are currently mixed up in the results, which

@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: PART C - VQR at k = 4, 6, 8 qubits, scored on the SHARED 10k test set.
 #
 #          Everything except k is frozen to the Part-A configuration:

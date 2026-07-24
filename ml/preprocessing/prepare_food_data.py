@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: One-time orchestrator for the food (FreshRetailNet-50K) data pipeline:
 #          loader -> cleaner -> feature_engineering. Reuses the existing
 #          functions from those modules instead of re-implementing them.

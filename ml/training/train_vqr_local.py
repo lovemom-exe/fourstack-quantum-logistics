@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: LOCAL, credit-free VQR-vs-XGBoost feasibility comparison.
 #
 #          Runs entirely on qiskit's local StatevectorEstimator (NOT the cloud
@@ -53,7 +53,10 @@ K_FEATURES = 4              # 4 qubits
 FEATURE_MAP_REPS = 2
 ANSATZ_REPS = 3
 MAXITER = 300               # COBYLA budget (was 60 - objective still descending)
-RESTART_SEEDS = [0, 1, 2]   # 3 random restarts
+# 3 seeded restarts: the VQR objective landscape is non-convex and COBYLA is a
+# local optimizer, so a single start can settle in a poor local minimum. We run
+# several and keep the best BY VALIDATION loss (never by test) - see main().
+RESTART_SEEDS = [0, 1, 2]
 VAL_FRACTION = 0.2
 WINSOR_PERCENTILE = 99      # applied to TRAIN target only
 RANDOM_STATE = 42

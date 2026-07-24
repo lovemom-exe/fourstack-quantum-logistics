@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: PART 3 - Protocol-Q XGBoost control, matched to the VQR runs.
 #
 #          The Part-B grid trained XGBoost on 1,000 rows, while VQR trains on

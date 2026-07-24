@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: PROOF-OF-EXECUTION on real QuApp hardware (minimal credit).
 #
 #          This is NOT training and has NO optimization loop. It submits a

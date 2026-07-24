@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: PART 4 - demo artifacts for the pitch video.
 #
 #          Loads the PERSISTED Protocol-P XGBoost baseline (no retraining) and

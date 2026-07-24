@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: Train and PERSIST the Protocol-P production baseline.
 #
 #          Protocol P: log1p -> expm1. NO winsorize, NO MinMax on the target.

@@ -1,5 +1,5 @@
 # ==========================================================================
-# Author: Hoang Anh Quan
+# Author: Nguyen Minh Hoang
 # Purpose: PART A/B - shared 10k test set + XGBoost k-sweep ablation.
 #
 #          Builds ONE large held-out test set (10,000 rows drawn from the eval
@@ -42,6 +42,10 @@ from utils.path import TRAINING_EVA_RESULT
 # ==========================================================================
 # PARAMETERS
 # ==========================================================================
+# 10,000 rows on purpose. Earlier small test draws gave optimistically inflated,
+# high-variance R^2: one small draw reported R^2 ~= 0.2144 where this large fixed
+# set gives ~= 0.0909 (roughly a 2.4x inflation). Every configuration is scored
+# on this one large set; do NOT shrink it back to chase a nicer-looking R^2.
 TEST_N = 10000
 TEST_SEED = 2024          # distinct, documented seed for the large test draw
 RANDOM_STATE = 42

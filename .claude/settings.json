@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run *)",
+      "Bash(OMP_NUM_THREADS=2 uv run python -m training.ablation_winsorize)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(OMP_NUM_THREADS=2 uv run python -m training.train_protocol_p)",
+      "Bash(python -c ' *)",
+      "Bash(tasklist)"
+    ]
+  }
+}

@@ -18,12 +18,7 @@ from typing import Tuple, List
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import SelectKBest, mutual_info_regression
-from sklearn.metrics import (
-    mean_absolute_error,
-    mean_squared_error,
-    root_mean_squared_error,
-    r2_score,
-)
+from evaluation.metrics import mae, mape, mse, r2, rmse
 from algorithms.xgboost import xgboost
 from algorithms.random_forest import random_forest
 from algorithms.k_nearest_n import knn
@@ -32,8 +27,15 @@ from algorithms.k_nearest_n import knn
 # PARAMETERS
 # ==========================================================================
 DEMAND = "sale_amount"
-food_train_df = pd.read_csv(FRESH_RETAIL_TRAIN_PATH_FEATURE)
-food_eval_df = pd.read_csv(FRESH_RETAIL_EVAL_PATH_FEATURE)
+
+
+def _read_csv_if_exists(path: str):
+    """Avoid crashing at import time before the featured CSVs have been generated."""
+    return pd.read_csv(path) if os.path.exists(path) else None
+
+
+food_train_df = _read_csv_if_exists(FRESH_RETAIL_TRAIN_PATH_FEATURE)
+food_eval_df = _read_csv_if_exists(FRESH_RETAIL_EVAL_PATH_FEATURE)
 
 # ==========================================================================
 # CORE LOGIC & FUNCTIONS
@@ -131,10 +133,11 @@ def main():
         print("Model: XGBoost")
         print("=" * 50)
         print(f"n = {n}, k = {k}")
-        print(f"R^2: {r2_score(y_test, y_pred)}")
-        print(f"MAE: {mean_absolute_error(y_test, y_pred)}")
-        print(f"MSE: {mean_squared_error(y_test, y_pred)}")
-        print(f"RMAE: {root_mean_squared_error(y_test, y_pred)}")
+        print(f"R^2: {r2(y_test, y_pred)}")
+        print(f"MAE: {mae(y_test, y_pred)}")
+        print(f"MSE: {mse(y_test, y_pred)}")
+        print(f"RMSE: {rmse(y_test, y_pred)}")
+        print(f"MAPE: {mape(y_test, y_pred)}")
         print(f"y_pred_1: {y_pred[0]}")
         print(f"y_test_1: {y_test[0]}")
         print(f"y_pred_2: {y_pred[10]}")

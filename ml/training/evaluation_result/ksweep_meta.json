@@ -1,0 +1,34 @@
+{
+  "test_n": 10000,
+  "test_seed": 2024,
+  "random_state": 42,
+  "pool": [
+    "discount",
+    "holiday_flag",
+    "activity_flag",
+    "precpt",
+    "avg_temperature",
+    "avg_humidity",
+    "avg_wind_level",
+    "day_sin",
+    "day_cos",
+    "day_sin_month",
+    "day_cos_month",
+    "month_sin",
+    "month_cos",
+    "bad_weather",
+    "is_weekend"
+  ],
+  "k_grid": [
+    4,
+    6,
+    8,
+    12,
+    15
+  ],
+  "n_train_grid": [
+    1000,
+    50000
+  ],
+  "note": "Diagnostic ablation. Full curve reported; no k selected on test."
+}

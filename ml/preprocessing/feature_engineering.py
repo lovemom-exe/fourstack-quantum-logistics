@@ -6,6 +6,7 @@
 # ==========================================================================
 import json
 
+import os
 import re
 import math
 import matplotlib.pyplot as plt
@@ -44,9 +45,14 @@ food_eval = FRESH_RETAIL_EVAL_PATH_PROCESS
 # medical_central_store = NATIONAL_CENTRAL_MEDICAL_STORE_PATH_PROCESS
 # medical_region = REGIONAL_WAREHOUSE_PATH_PROCESS
 
+def _read_csv_if_exists(path: str):
+    """Avoid crashing at import time when an out-of-scope dataset isn't present yet."""
+    return pd.read_csv(path) if os.path.exists(path) else None
+
+
 # Food Data Frame
-food_train_df = pd.read_csv(food_train)
-food_eval_df = pd.read_csv(food_eval)
+food_train_df = _read_csv_if_exists(food_train)
+food_eval_df = _read_csv_if_exists(food_eval)
 
 
 # Medical Data Frame
@@ -55,7 +61,7 @@ food_eval_df = pd.read_csv(food_eval)
 # medical_region_df = pd.read_csv(medical_region)
 
 # perishable goods data
-perishable_goods_data = pd.read_csv(PERISHABLE_GOODS_DATA)
+perishable_goods_data = _read_csv_if_exists(PERISHABLE_GOODS_DATA)
 
 # ==========================================================================
 # CORE LOGIC & FUNCTIONS

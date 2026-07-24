@@ -5,6 +5,7 @@
 # IMPORTS & MODULE LOADING
 # ==========================================================================
 import json
+import os
 import re
 
 import numpy as np
@@ -37,18 +38,23 @@ medical_district = DISTRICT_STORE_PATH
 medical_central_store = NATIONAL_CENTRAL_MEDICAL_STORE_PATH
 medical_region = REGIONAL_WAREHOUSE_PATH
 
+def _read_csv_if_exists(path: str):
+    """Avoid crashing at import time when an out-of-scope dataset isn't present yet."""
+    return pd.read_csv(path) if os.path.exists(path) else None
+
+
 # Food Data Frame
-food_train_df = pd.read_csv(FRESH_RETAIL_TRAIN_PATH)
-food_eval_df = pd.read_csv(FRESH_RETAIL_EVAL_PATH)
+food_train_df = _read_csv_if_exists(FRESH_RETAIL_TRAIN_PATH)
+food_eval_df = _read_csv_if_exists(FRESH_RETAIL_EVAL_PATH)
 
 
 # Medical Data Frame
-medical_district_df = pd.read_csv(DISTRICT_STORE_PATH)
-medical_central_store_df = pd.read_csv(NATIONAL_CENTRAL_MEDICAL_STORE_PATH)
-medical_region_df = pd.read_csv(REGIONAL_WAREHOUSE_PATH)
+medical_district_df = _read_csv_if_exists(DISTRICT_STORE_PATH)
+medical_central_store_df = _read_csv_if_exists(NATIONAL_CENTRAL_MEDICAL_STORE_PATH)
+medical_region_df = _read_csv_if_exists(REGIONAL_WAREHOUSE_PATH)
 
 # Perishable goods data
-perishable_good_data = pd.read_csv(PERISHABLE_GOODS_DATA)
+perishable_good_data = _read_csv_if_exists(PERISHABLE_GOODS_DATA)
 
 
 # ==========================================================================

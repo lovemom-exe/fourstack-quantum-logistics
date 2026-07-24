@@ -1,0 +1,64 @@
+[
+  {
+    "model": "VQR",
+    "n_train": 800,
+    "k": 4,
+    "r2_real": -0.105880694736052,
+    "r2_log": -0.4519180711814468,
+    "mae": 1.0737208864687586,
+    "rmse": 2.1556589666774797,
+    "mape": 173.4569175106973,
+    "std_ratio_real": 0.27764086708972546,
+    "r_real": -0.04080503435748164,
+    "pred_min_real": 0.5595194023906251,
+    "pred_max_real": 3.990555169774093,
+    "std_ratio_log": 0.46579941547678305,
+    "r_log": -0.065835652064039,
+    "pred_min_log": 0.44437769840584884,
+    "pred_max_log": 1.6075471600426396,
+    "selected_seed": 1,
+    "restart_objectives": {
+      "0": 0.204808,
+      "1": 0.189893,
+      "2": 0.216478
+    },
+    "restart_evals": {
+      "0": 165,
+      "1": 192,
+      "2": 154
+    },
+    "hit_cap_any": false,
+    "selected": "discount;avg_temperature;day_cos;month_cos"
+  },
+  {
+    "model": "VQR",
+    "n_train": 800,
+    "k": 6,
+    "r2_real": -0.04129398060521572,
+    "r2_log": -0.46826665951694424,
+    "mae": 1.1255525763273526,
+    "rmse": 2.091763572140752,
+    "mape": 198.78790360870374,
+    "std_ratio_real": 0.11688206645348348,
+    "r_real": 0.02293144834299695,
+    "pred_min_real": 0.7905819541481902,
+    "pred_max_real": 2.405386079988201,
+    "std_ratio_log": 0.21062010036154102,
+    "r_log": -0.0022191993177045435,
+    "pred_min_log": 0.5825406810638113,
+    "pred_max_log": 1.2253583193670514,
+    "selected_seed": 2,
+    "restart_objectives": {
+      "0": 0.262426,
+      "1": 0.259183,
+      "2": 0.243764
+    },
+    "restart_evals": {
+      "0": 269,
+      "1": 236,
+      "2": 300
+    },
+    "hit_cap_any": true,
+    "selected": "discount;avg_temperature;avg_humidity;day_sin;day_cos;month_cos"
+  }
+]

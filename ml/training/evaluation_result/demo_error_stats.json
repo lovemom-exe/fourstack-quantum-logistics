@@ -1,0 +1,8 @@
+{
+  "bias_mean_signed_error": -0.37202421133844854,
+  "under_forecast_rate": 0.5155,
+  "mean_under_forecast_magnitude": 1.0688045464549216,
+  "over_forecast_rate": 0.4845,
+  "median_signed_error": -0.02244584560394286,
+  "n_test": 10000
+}

@@ -10,7 +10,7 @@
 # ==========================================================================
 function_name = "test2"
 project_id = "566"
-device_id = 675
+device_id = 710
 shots = 1024
 workspace_id = "ws_seaquantathon2026"
 base_url = "https://functions.quapp.cloud"

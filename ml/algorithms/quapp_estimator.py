@@ -22,7 +22,7 @@ from utils.api_util import (
 # PARAMETERS
 # ==========================================================================
 with open(ACCESS_TOKEN_PATH, "r") as access_token:
-    ACCESS_TOKEN = access_token.read()
+    ACCESS_TOKEN = access_token.read().strip()
 func_name = function_name
 prj_id = project_id
 dev_id = device_id
@@ -92,6 +92,8 @@ class QuappEstimator:
         response = self.client.post(
             "/api/v1/third-party/function/invoke", json=json_data
         )
+        print(response.status_code)
+        print(response.json())
         response.raise_for_status()
         if "data" not in response.json():
             raise RuntimeError(response.json())

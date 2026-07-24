@@ -8,6 +8,7 @@ import json
 
 import re
 import math
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -33,7 +34,7 @@ from utils.path import (
 # PARAMETERS
 # ==========================================================================
 # Export Data Path
-export_path = FEATURE_ENGINEERING_DATA_PATH
+export_path = os.path.join(FEATURE_ENGINEERING_DATA_PATH, "perishable_goods_data.csv")
 
 # Food Data Path
 food_train = FRESH_RETAIL_TRAIN_PATH_PROCESS
@@ -57,6 +58,35 @@ food_eval_df = pd.read_csv(food_eval)
 # perishable goods data
 perishable_goods_data = pd.read_csv(PERISHABLE_GOODS_DATA)
 
+# FEATURES
+features_list = [
+    "units_sold",
+    "shelf_life_days",
+    "cost_price",
+    "spoilage_sensitivity",
+    "spoilage_risk",
+    "selling_price",
+    "discount_pct",
+    "is_promoted",
+    "supplier_score",
+    "storage_temp",
+    "category_Bakery",
+    "category_Beverages",
+    "category_Dairy",
+    "category_Deli",
+    "category_Frozen_Meals",
+    "category_Meat",
+    "category_Pharmaceuticals",
+    "category_Produce",
+    "category_Ready_to_Eat",
+    "category_Seafood",
+    "region_Midwest",
+    "region_Northeast",
+    "region_Southeast",
+    "region_Southwest",
+    "region_West",
+]
+
 # ==========================================================================
 # CORE LOGIC & FUNCTIONS
 # ==========================================================================
@@ -68,7 +98,7 @@ def view(df: pd.DataFrame):
         print("the dataframe is not exist")
         return
     print("=" * 50)
-    json_df = df.iloc[0].to_dict()
+    json_df = df.iloc[10].to_dict()
     print(json.dumps(json_df, indent=4, default=str))
     # Basic View
     print("=" * 50)
@@ -88,6 +118,35 @@ def view(df: pd.DataFrame):
     # missing_df = df.isnull().mean() * 100
     # print(f"MISSING DATA PERCENTAGES:\n{missing_df}%")
     # print("=" * 50)
+
+
+def encode_datetime(df: pd.DataFrame, column: str) -> None:
+    """
+    Convert a datetime column into cyclical features.
+    """
+    df[column] = pd.to_datetime(df[column])
+
+    # Extract time components
+    df["hour"] = df[column].dt.hour
+    df["day_of_week"] = df[column].dt.dayofweek
+    df["day"] = df[column].dt.day
+    df["month"] = df[column].dt.month
+
+    # Hour (24h)
+    df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 24)
+    df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 24)
+
+    # Day of week (7d)
+    df["day_sin"] = np.sin(2 * np.pi * df["day_of_week"] / 7)
+    df["day_cos"] = np.cos(2 * np.pi * df["day_of_week"] / 7)
+
+    # Day of month (31d)
+    df["day_sin_month"] = np.sin(2 * np.pi * df["day"] / 31)
+    df["day_cos_month"] = np.cos(2 * np.pi * df["day"] / 31)
+
+    # Month (12m)
+    df["month_sin"] = np.sin(2 * np.pi * df["month"] / 12)
+    df["month_cos"] = np.cos(2 * np.pi * df["month"] / 12)
 
 
 def drop_columns(df: pd.DataFrame, columns: list[str]) -> None:
@@ -363,8 +422,15 @@ def engineer_interaction_features(df: pd.DataFrame) -> pd.DataFrame:
 # ==========================================================================
 # Perishable Goods Feature
 # ==========================================================================
+def onehot_encode(feature: str):
+    global perishable_goods_data
+
+    perishable_goods_data = pd.get_dummies(
+        perishable_goods_data, columns=[feature], dtype=int
+    )
+
+
 def perishable_new_feature():
-    # perishable_goods_data["category"]
     pass
 
 
@@ -635,9 +701,12 @@ def main():
             "supplier_id",
         ],
     )
+    onehot_encode("category")
+    onehot_encode("region")
+    onehot_encode("quality_grade")
 
     # ----------------------------------------------------------
-    # view(perishable_goods_data)
+    view(perishable_goods_data[features_list])
     # plot_histogram(
     #     perishable_goods_data,
     #     [
@@ -647,37 +716,8 @@ def main():
     #     ],
     # )
 
-    plot_correlation(
-        perishable_goods_data,
-        [
-            "daily_demand",
-            "demand_variability",
-            "shelf_life_days",
-            "days_remaining_at_purchase",
-            "storage_temp",
-            "temp_deviation",
-            "base_price",
-            "cost_price",
-            "initial_quantity",
-            "spoilage_sensitivity",
-            "is_weekend",
-            "temp_abuse_events",
-            "distribution_hours",
-            "handling_score",
-            "packaging_score",
-            "spoilage_risk",
-            "was_spoiled",
-            "days_until_expiry",
-            "discount_pct",
-            "selling_price",
-            "units_sold",
-            "units_wasted",
-            "waste_pct",
-            "waste_cost",
-            "profit",
-            "is_promoted",
-        ],
-    )
+    # plot_correlation(perishable_goods_data, features_list)
+    # export_csv(perishable_goods_data[features_list], export_path)
 
 
 if __name__ == "__main__":

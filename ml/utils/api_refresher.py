@@ -47,8 +47,8 @@ class RefreshToken:
         # print(response.status_code)
         # print(response.headers)
         # print(response.text)
-        new_access_token = response.json()["accessToken"]
-        new_refresh_token = response.json()["refreshToken"]
+        new_access_token = response.json()["data"]["accessToken"]
+        new_refresh_token = response.json()["data"]["refreshToken"]
 
         self._save(new_access_token, new_refresh_token)
 

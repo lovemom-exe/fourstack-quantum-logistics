@@ -85,6 +85,16 @@ def feature_scaler(
     return X_train, X_test
 
 
+def y_feature_scaler(
+    y_train: np.ndarray, y_test: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    scaler = MinMaxScaler()
+    y_train_scaled = scaler.fit_transform(y_train.reshape(-1, 1)).ravel()
+    y_test_scaled = scaler.fit_transform(y_train.reshape(-1, 1)).ravel()
+
+    return y_train_scaled, y_test_scaled
+
+
 # ----------------------------------------------------------
 # Write CSV
 def write_csv(path: str, content: List = []) -> None:
@@ -144,9 +154,9 @@ def main():
 
     # ----------------------------------------------------------
     # Write Data to CSV file
-    write_csv(
-        VQR_TRAIN_RESULT,
-    )
+    # write_csv(
+    #     VQR_TRAIN_RESULT,
+    # )
 
 
 if __name__ == "__main__":

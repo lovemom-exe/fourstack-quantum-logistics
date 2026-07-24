@@ -21,21 +21,110 @@ from sklearn.feature_selection import SelectKBest, mutual_info_regression
 
 from algorithms.xgboost import xgboost
 from algorithms.vqr import vqr
-from training.ml_train import create_food_sample, feature_scaler
+from training.ml_train import create_food_sample, feature_scaler, y_feature_scaler
 from utils.path import BENCHMARK_FOOD
 
 # ==========================================================================
 # PARAMETERS
 # ==========================================================================
-feature_list = [4, 8, 12, 16, 20, 24, 27]
+feature_list = [
+    [
+        "units_sold",
+        "shelf_life_days",
+        "cost_price",
+        "spoilage_sensitivity",
+    ],
+    [
+        "units_sold",
+        "shelf_life_days",
+        "cost_price",
+        "spoilage_sensitivity",
+        "spoilage_risk",
+        "selling_price",
+        "discount_pct",
+        "is_promoted",
+    ],
+    [
+        "units_sold",
+        "shelf_life_days",
+        "cost_price",
+        "spoilage_sensitivity",
+        "spoilage_risk",
+        "selling_price",
+        "discount_pct",
+        "is_promoted",
+        "supplier_score",
+        "storage_temp",
+    ],
+    [
+        "units_sold",
+        "shelf_life_days",
+        "cost_price",
+        "spoilage_sensitivity",
+        "spoilage_risk",
+        "selling_price",
+        "discount_pct",
+        "is_promoted",
+        "supplier_score",
+        "storage_temp",
+        "region_Midwest",
+        "region_Northeast",
+        "region_Southeast",
+        "region_Southwest",
+        "region_West",
+    ],
+    [
+        "units_sold",
+        "shelf_life_days",
+        "cost_price",
+        "spoilage_sensitivity",
+        "spoilage_risk",
+        "selling_price",
+        "discount_pct",
+        "is_promoted",
+        "supplier_score",
+        "storage_temp",
+        "category_Bakery",
+        "category_Beverages",
+        "category_Dairy",
+        "category_Deli",
+        "category_Frozen_Meals",
+        "category_Meat",
+        "category_Pharmaceuticals",
+        "category_Produce",
+        "category_Ready_to_Eat",
+        "category_Seafood",
+        "region_Midwest",
+        "region_Northeast",
+        "region_Southeast",
+        "region_Southwest",
+        "region_West",
+    ],
+]
+# feature_list = [4, 6, 8, 10, 12]
 error_benchmark_result_path = os.path.join(BENCHMARK_FOOD, "error_benchmark.csv")
 
-sample_number = 20
-xgboost_score_path = os.path.join(BENCHMARK_FOOD, f"xgboost/score_{sample_number}f.csv")
-vqr_score_path = os.path.join(BENCHMARK_FOOD, f"vqr/score_{sample_number}f.csv")
+sample_number = 100
+is_scale_x = True
+is_scale_y = True
+scale_name_path = "xy"
+if is_scale_x and not is_scale_y:
+    scale_name_path = "x"
+elif is_scale_y and not is_scale_x:
+    scale_name_path = "y"
+elif not is_scale_x and not is_scale_y:
+    scale_name_path = "non"
+
+xgboost_score_path = os.path.join(
+    BENCHMARK_FOOD, f"xgboost/score_{sample_number}s_{scale_name_path}.csv"
+)
+vqr_score_path = os.path.join(
+    BENCHMARK_FOOD, f"vqr/score_{sample_number}s_{scale_name_path}.csv"
+)
+export_data_path = vqr_score_path
 
 
-error_metrics = ["r2_score", "mae", "mse", "rmse", "mape"]
+error_metrics = ["r2_score", "mae", "mse", "rmse"]
 
 
 # ==========================================================================
@@ -49,74 +138,65 @@ def export_csv(df: pd.DataFrame, filename: str, index: bool = False) -> None:
     print(f"[DONE] Data exported to '{filename}'")
 
 
-def calculate_mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    mask = y_true != 0
-    if not np.any(mask):
-        return 0.0
-    return float(np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100)
-
-
 def benchmark_error(
-    X_train_all: np.ndarray,
+    X_train: np.ndarray,
     y_train: np.ndarray,
-    X_test_all: np.ndarray,
+    X_test: np.ndarray,
     y_test: np.ndarray,
 ):
     results_list = []
 
-    for k in feature_list:
+    for k in range(5):
         print("=" * 40)
         print(f"[{k}] training:")
-        selector = SelectKBest(score_func=mutual_info_regression, k=k)
-        X_train_k = selector.fit_transform(X_train_all, y_train)
-        X_test_k = selector.transform(X_test_all)
+        # selector = SelectKBest(score_func=mutual_info_regression, k=k)
+        # X_train_k = selector.fit_transform(X_train_all, y_train)
+        # X_test_k = selector.transform(X_test_all)
 
-        # print("XGBoost: ", end="")
-        # model_xgb = xgboost(X_train_k, y_train)
-        # if model_xgb is not None:
-        #     print("Done")
-        #     y_pred_xgb = model_xgb.predict(X_test_k)
-        #     results_list.append(
-        #         {
-        #             "model_name": "XGBoost",
-        #             "feature_number": k,
-        #             "r2_score": r2_score(y_test, y_pred_xgb),
-        #             "mae": mean_absolute_error(y_test, y_pred_xgb),
-        #             "mse": mean_squared_error(y_test, y_pred_xgb),
-        #             "rmse": root_mean_squared_error(y_test, y_pred_xgb),
-        #             "mape": calculate_mape(y_test, y_pred_xgb),
-        #         }
-        #     )
-        # else:
-        #     print("Fail")
-        #     return
-        print("=" * 20)
-
-        print("VQR: ", end="")
-        model_vqr = vqr(X_train_k, y_train, k=k)
-        if model_vqr is not None:
+        print("XGBoost: ", end="")
+        model_xgb = xgboost(X_train, y_train)
+        if model_xgb is not None:
             print("Done")
-            if isinstance(X_test_k, np.ndarray):
-                y_pred_vqr = model_vqr.predict(X_test_k)
-                results_list.append(
-                    {
-                        "model_name": "VQR",
-                        "feature_number": k,
-                        "r2_score": r2_score(y_test, y_pred_vqr),
-                        "mae": mean_absolute_error(y_test, y_pred_vqr),
-                        "mse": mean_squared_error(y_test, y_pred_vqr),
-                        "rmse": root_mean_squared_error(y_test, y_pred_vqr),
-                        "mape": calculate_mape(y_test, y_pred_vqr),
-                    }
-                )
+            y_pred_xgb = model_xgb.predict(X_test)
+            results_list.append(
+                {
+                    "model_name": "XGBoost",
+                    "feature_number": k,
+                    "r2_score": r2_score(y_test, y_pred_xgb),
+                    "mae": mean_absolute_error(y_test, y_pred_xgb),
+                    "mse": mean_squared_error(y_test, y_pred_xgb),
+                    "rmse": root_mean_squared_error(y_test, y_pred_xgb),
+                }
+            )
         else:
             print("Fail")
             return
+        # print("=" * 20)
+
+        # print("VQR: ", end="")
+        # model_vqr = vqr(X_train, y_train, k=k)
+        # if model_vqr is not None:
+        #     print("Done")
+        #     if isinstance(X_test, np.ndarray):
+        #         y_pred_vqr = model_vqr.predict(X_test)
+        #         results_list.append(
+        #             {
+        #                 "model_name": "VQR",
+        #                 "feature_number": k,
+        #                 "r2_score": r2_score(y_test, y_pred_vqr),
+        #                 "mae": mean_absolute_error(y_test, y_pred_vqr),
+        #                 "mse": mean_squared_error(y_test, y_pred_vqr),
+        #                 "rmse": root_mean_squared_error(y_test, y_pred_vqr),
+        #             }
+        #         )
+        # else:
+        #     print("Fail")
+        #     return
 
         # Export Error Benchmark Data
         df_results = pd.DataFrame(results_list)
-        os.makedirs(os.path.dirname(vqr_score_path), exist_ok=True)
-        export_csv(df_results, vqr_score_path)
+        os.makedirs(os.path.dirname(export_data_path), exist_ok=True)
+        export_csv(df_results, export_data_path)
     print("Done")
 
 
@@ -243,15 +323,16 @@ def benchmark_plots(csv_path: str) -> None:
 
 
 def main():
-    X_train_raw, y_train, X_test_raw, y_test = create_food_sample(
-        n_sample=sample_number
-    )
-    X_train_scaled, X_test_scaled = feature_scaler(X_train_raw, X_test_raw)
+    X_train, y_train, X_test, y_test = create_food_sample(n_sample=sample_number)
+    if is_scale_x:
+        X_train, X_test = feature_scaler(X_train, X_test)
+    if is_scale_y:
+        y_train, y_test = y_feature_scaler(y_train, y_test)
 
     benchmark_error(
-        X_train_all=X_train_scaled,
+        X_train_all=X_train,
         y_train=y_train,
-        X_test_all=X_test_scaled,
+        X_test_all=X_test,
         y_test=y_test,
     )
     # benchmark_plots(error_benchmark_result_path)

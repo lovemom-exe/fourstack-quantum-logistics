@@ -45,8 +45,9 @@ def vqr(
     # Optimizer
     optimizer = COBYLA(maxiter=100)
 
-    # Estimator
-    estimator = QuappEstimator()
+    # Estimar
+    # estimator = QuappEstimator()
+    estimator = StatevectorEstimator()
 
     # Build Model
     model = VQR(
@@ -67,17 +68,24 @@ def vqr(
 
 
 def main():
-    X = np.array(
-        [
-            [0.1, 0.2],
-            [0.2, 0.3],
-            [0.3, 0.4],
-            [0.4, 0.5],
-        ]
-    )
+    pass
+    # X = np.array(
+    #     [
+    #         [0.1, 0.2],
+    #         [0.2, 0.3],
+    #         [0.3, 0.4],
+    #         [0.4, 0.5],
+    #     ]
+    # )
 
-    y = np.array([1.0, 2.0, 3.0, 4.0])
-    model = vqr(X, y, k=2)
+    # y = np.array([1.0, 2.0, 3.0, 4.0])
+    # model = vqr(X, y, k=2)
+    # if model is None:
+    #     return
+
+    # X_test = np.array([[0.7, 0.9]])
+    # y_test = model.predict(X_test)
+    # print(y_test)
 
 
 if __name__ == "__main__":

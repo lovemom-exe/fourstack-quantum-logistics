@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 const Warehouse = () => {
     const form_style: React.CSSProperties = {
         display: "grid",
@@ -10,7 +12,7 @@ const Warehouse = () => {
         display: 'flex',
         alignItems: 'center',
         fontWeight: 'bold',
-        fontSize: '20px',
+        fontSize: '17px',
         maxWidth: "100px"
     };
 
@@ -20,6 +22,7 @@ const Warehouse = () => {
         width: '100%',
         fontSize: "20px",
     };
+
     return (
         <section className="section">
             <div className="section__inner">
@@ -50,8 +53,11 @@ const Warehouse = () => {
                             <option value="">Mixed</option>
                         </select>
 
-                        <label style={label_style}>Storage Capacity:</label>
+                        <label style={label_style}>Storage Size(m³):</label>
                         <input type="number" style={input_style} />
+
+                        <label style={label_style}>Operating Days:</label>
+                        <OperatingDays />
                     </form>
                 </div>
             </div>
@@ -60,3 +66,91 @@ const Warehouse = () => {
 };
 
 export { Warehouse };
+
+const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const tickBox: React.CSSProperties = {
+    height: '10px',
+    width: '10px',
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    cursor: 'pointer',
+    display: 'inline-grid',
+    placeContent: 'center',
+    margin: 0,
+};
+
+export default function OperatingDays() {
+    const [selectedDays, setSelectedDays] = useState<string[]>([
+        'Sat',
+        'Sun',
+    ]);
+
+    const toggleDay = (day: string) => {
+        setSelectedDays((current) =>
+            current.includes(day)
+                ? current.filter((selectedDay) => selectedDay !== day)
+                : [...current, day],
+        );
+    };
+
+    return (
+        <>
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '10px',
+                    flexWrap: 'wrap',
+                }}
+            >
+                {daysOfWeek.map((day) => {
+                    const checked = selectedDays.includes(day);
+
+                    return (
+                        <label
+                            key={day}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            <span
+                                style={{
+                                    ...tickBox,
+                                    backgroundColor: checked
+                                        ? 'black'
+                                        : 'transparent',
+                                    color: 'white',
+                                    fontSize: '17px',
+                                    fontWeight: 'bold',
+                                    lineHeight: 1,
+                                }}
+                                className="bento-card"
+                            >
+                                {checked ? '×' : ''}
+                            </span>
+
+                            <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleDay(day)}
+                                style={{ display: 'none' }}
+                            />
+
+                            <span
+                                style={{
+                                    fontSize: '17px',
+                                    marginLeft: '6px',
+                                }}
+                            >
+                                {day}
+                            </span>
+                        </label>
+                    );
+                })}
+            </div>
+        </>
+    );
+}

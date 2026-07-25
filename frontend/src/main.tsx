@@ -20,6 +20,7 @@ import type { Brand } from "./components/header";
 import { Home } from "./pages/home";
 import { DemandForecast } from "./pages/demand_forecast/demand_forecast";
 import { Upload } from "./pages/upload_page/upload_page";
+import { Subscription } from "./pages/subscription/subscription"
 
 // ============================================================
 // OUR BRAND
@@ -48,6 +49,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/" element={<Home />} />
         <Route path="/data" element={<Upload />} />
         <Route path="/forecast" element={<DemandForecast />} />
+        <Route path="/subscription" element={<Subscription />} />
       </Routes>
       <Footer myBrand={MyBrand} />
 

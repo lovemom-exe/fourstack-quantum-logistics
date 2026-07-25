@@ -31,6 +31,7 @@ const Header = ({ myBrand }: { myBrand: Brand }) => {
                     <Link to="/">Home Map</Link>
                     <Link to="/data">Data</Link>
                     <Link to="/forecast">Forecast</Link>
+                    <Link to="/subscription">Subscription</Link>
                 </nav>
 
                 <div className="header__right">

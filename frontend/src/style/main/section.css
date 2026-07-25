@@ -40,5 +40,13 @@
     align-items: start;
 }
 
-.section__left  { grid-column: span 5; }
-.section__right { grid-column: span 7; display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+.section__left {
+    grid-column: span 5;
+}
+
+.section__right {
+    grid-column: span 7;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+}

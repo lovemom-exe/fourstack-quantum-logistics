@@ -10,6 +10,7 @@ from utils.path import (
     FRESH_RETAIL_EVAL_PATH_FEATURE,
     FRESH_RETAIL_TRAIN_PATH_FEATURE,
     VQR_TRAIN_RESULT,
+    PERISHABLE_GOODS_DATA_PATH,
 )
 
 import pandas as pd
@@ -28,12 +29,19 @@ from algorithms.xgboost import xgboost
 from algorithms.random_forest import random_forest
 from algorithms.k_nearest_n import knn
 
+from preprocessing.split import split
+
 # ==========================================================================
 # PARAMETERS
 # ==========================================================================
 DEMAND = "sale_amount"
 food_train_df = pd.read_csv(FRESH_RETAIL_TRAIN_PATH_FEATURE)
 food_eval_df = pd.read_csv(FRESH_RETAIL_EVAL_PATH_FEATURE)
+
+
+# Perishable Data
+perishable_data = pd.read_csv(PERISHABLE_GOODS_DATA_PATH)
+X_perish_train, X_perish_test, y_perish_train, y_perish_test = split(perishable_data, 0)
 
 # ==========================================================================
 # CORE LOGIC & FUNCTIONS
@@ -70,6 +78,49 @@ def create_food_sample(
     )
 
 
+def create_sample_v2(
+    X_train: np.ndarray,
+    X_test: np.ndarray,
+    y_train: np.ndarray,
+    y_test: np.ndarray,
+    n_sample: int = 3000,
+    random_state: int = 42,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+
+    if n_sample > len(X_train):
+        raise ValueError(f"n_sample={n_sample} exceeds training size={len(X_train)}")
+
+    if n_sample > len(X_test):
+        raise ValueError(f"n_sample={n_sample} exceeds testing size={len(X_test)}")
+
+    rng = np.random.default_rng(random_state)
+
+    train_indices = rng.choice(
+        len(X_train),
+        size=n_sample,
+        replace=False,
+    )
+
+    test_indices = rng.choice(
+        len(X_test),
+        size=n_sample,
+        replace=False,
+    )
+
+    X_train_sample = X_train[train_indices]
+    X_test_sample = X_test[test_indices]
+
+    y_train_sample = y_train[train_indices]
+    y_test_sample = y_test[test_indices]
+
+    return (
+        X_train_sample,
+        X_test_sample,
+        y_train_sample,
+        y_test_sample,
+    )
+
+
 # ----------------------------------------------------------
 # Feature Scaler
 def feature_scaler(
@@ -86,11 +137,14 @@ def feature_scaler(
 
 
 def y_feature_scaler(
-    y_train: np.ndarray, y_test: np.ndarray
+    y_train: np.ndarray,
+    y_test: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
     scaler = MinMaxScaler()
+
     y_train_scaled = scaler.fit_transform(y_train.reshape(-1, 1)).ravel()
-    y_test_scaled = scaler.fit_transform(y_train.reshape(-1, 1)).ravel()
+
+    y_test_scaled = scaler.transform(y_test.reshape(-1, 1)).ravel()
 
     return y_train_scaled, y_test_scaled
 

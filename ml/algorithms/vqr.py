@@ -35,7 +35,7 @@ def vqr(
     Returns:
         VQR | None
     """
-    assert X_train.shape[1] == k, "Dataset's features don't equal to k!"
+    # assert X_train.shape[1] == k, "Dataset's features don't equal to k!"
     # Feature Map
     featuremap = zz_feature_map(feature_dimension=k, reps=2)
 

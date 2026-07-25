@@ -1,5 +1,4 @@
-# ==========================================================================
-# Author: Hoang Anh Quan
+# ==========================================================================# Author: Hoang Anh Quan
 # Purpose: Do a Benchmark between models
 # ==========================================================================
 # IMPORTS & MODULE LOADING
@@ -17,25 +16,35 @@ from sklearn.metrics import (
     root_mean_squared_error,
     r2_score,
 )
-from sklearn.feature_selection import SelectKBest, mutual_info_regression
 
+# from sklearn.feature_selection import SelectKBest, mutual_info_regression
+
+from preprocessing.split import split
 from algorithms.xgboost import xgboost
 from algorithms.vqr import vqr
-from training.ml_train import create_food_sample, feature_scaler, y_feature_scaler
-from utils.path import BENCHMARK_FOOD
+from training.ml_train import (
+    create_food_sample,
+    feature_scaler,
+    y_feature_scaler,
+    create_sample_v2,
+)
+from utils.path import BENCHMARK_FOOD, PERISHABLE_GOODS_BM, PERISHABLE_GOODS_DATA_PATH
 
 # ==========================================================================
 # PARAMETERS
 # ==========================================================================
+# Perishable Data
+perishable_data = pd.read_csv(PERISHABLE_GOODS_DATA_PATH)
+X_perish_train, X_perish_test, y_perish_train, y_perish_test = split(perishable_data, 0)
+
+# Feature List
 feature_list = [
     [
-        "units_sold",
         "shelf_life_days",
         "cost_price",
         "spoilage_sensitivity",
     ],
     [
-        "units_sold",
         "shelf_life_days",
         "cost_price",
         "spoilage_sensitivity",
@@ -45,7 +54,6 @@ feature_list = [
         "is_promoted",
     ],
     [
-        "units_sold",
         "shelf_life_days",
         "cost_price",
         "spoilage_sensitivity",
@@ -57,7 +65,6 @@ feature_list = [
         "storage_temp",
     ],
     [
-        "units_sold",
         "shelf_life_days",
         "cost_price",
         "spoilage_sensitivity",
@@ -74,7 +81,6 @@ feature_list = [
         "region_West",
     ],
     [
-        "units_sold",
         "shelf_life_days",
         "cost_price",
         "spoilage_sensitivity",
@@ -101,12 +107,22 @@ feature_list = [
         "region_West",
     ],
 ]
-# feature_list = [4, 6, 8, 10, 12]
-error_benchmark_result_path = os.path.join(BENCHMARK_FOOD, "error_benchmark.csv")
+feature_list_index = [
+    [0, 1, 2],
+    [0, 1, 2, 3, 4, 5, 6],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20, 21, 22, 23],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+]
 
 sample_number = 100
 is_scale_x = True
 is_scale_y = True
+
+X_train, X_test, y_train, y_test = create_sample_v2(
+    X_perish_train, X_perish_test, y_perish_train, y_perish_test, n_sample=sample_number
+)
+
 scale_name_path = "xy"
 if is_scale_x and not is_scale_y:
     scale_name_path = "x"
@@ -116,12 +132,15 @@ elif not is_scale_x and not is_scale_y:
     scale_name_path = "non"
 
 xgboost_score_path = os.path.join(
-    BENCHMARK_FOOD, f"xgboost/score_{sample_number}s_{scale_name_path}.csv"
+    PERISHABLE_GOODS_BM, f"xgboost/score_{sample_number}s_{scale_name_path}_new.csv"
 )
 vqr_score_path = os.path.join(
-    BENCHMARK_FOOD, f"vqr/score_{sample_number}s_{scale_name_path}.csv"
+    PERISHABLE_GOODS_BM, f"vqr/score_{sample_number}s_{scale_name_path}_new_1.csv"
 )
 export_data_path = vqr_score_path
+
+vqr_bm_data_path = vqr_score_path
+xgboost_bm_data_path = xgboost_score_path
 
 
 error_metrics = ["r2_score", "mae", "mse", "rmse"]
@@ -146,52 +165,57 @@ def benchmark_error(
 ):
     results_list = []
 
-    for k in range(5):
+    for k in range(4, 5):
         print("=" * 40)
-        print(f"[{k}] training:")
+        feature_num = len(feature_list_index[k])
+        print(f"[{feature_num}] training:")
         # selector = SelectKBest(score_func=mutual_info_regression, k=k)
         # X_train_k = selector.fit_transform(X_train_all, y_train)
         # X_test_k = selector.transform(X_test_all)
 
-        print("XGBoost: ", end="")
-        model_xgb = xgboost(X_train, y_train)
-        if model_xgb is not None:
-            print("Done")
-            y_pred_xgb = model_xgb.predict(X_test)
-            results_list.append(
-                {
-                    "model_name": "XGBoost",
-                    "feature_number": k,
-                    "r2_score": r2_score(y_test, y_pred_xgb),
-                    "mae": mean_absolute_error(y_test, y_pred_xgb),
-                    "mse": mean_squared_error(y_test, y_pred_xgb),
-                    "rmse": root_mean_squared_error(y_test, y_pred_xgb),
-                }
-            )
-        else:
-            print("Fail")
-            return
-        # print("=" * 20)
-
-        # print("VQR: ", end="")
-        # model_vqr = vqr(X_train, y_train, k=k)
-        # if model_vqr is not None:
+        # print("XGBoost: ", end="")
+        # model_xgb = xgboost(X_train[:, feature_list_index[k]], y_train)
+        # if model_xgb is not None:
         #     print("Done")
-        #     if isinstance(X_test, np.ndarray):
-        #         y_pred_vqr = model_vqr.predict(X_test)
-        #         results_list.append(
-        #             {
-        #                 "model_name": "VQR",
-        #                 "feature_number": k,
-        #                 "r2_score": r2_score(y_test, y_pred_vqr),
-        #                 "mae": mean_absolute_error(y_test, y_pred_vqr),
-        #                 "mse": mean_squared_error(y_test, y_pred_vqr),
-        #                 "rmse": root_mean_squared_error(y_test, y_pred_vqr),
-        #             }
-        #         )
+        #     y_pred_xgb = model_xgb.predict(X_test[:, feature_list_index[k]])
+        #     results_list.append(
+        #         {
+        #             "model_name": "XGBoost",
+        #             "feature_number": feature_num,
+        #             "r2_score": r2_score(y_test, y_pred_xgb),
+        #             "mae": mean_absolute_error(y_test, y_pred_xgb),
+        #             "mse": mean_squared_error(y_test, y_pred_xgb),
+        #             "rmse": root_mean_squared_error(y_test, y_pred_xgb),
+        #         }
+        #     )
         # else:
         #     print("Fail")
         #     return
+        # print("=" * 20)
+
+        print("VQR: ", end="")
+        model_vqr = vqr(
+            X_train[:, feature_list_index[k]],
+            y_train,
+            k=feature_num,
+        )
+        if model_vqr is not None:
+            print("Done")
+            if isinstance(X_test[:, feature_list_index[k]], np.ndarray):
+                y_pred_vqr = model_vqr.predict(X_test[:, feature_list_index[k]])
+                results_list.append(
+                    {
+                        "model_name": "VQR",
+                        "feature_number": feature_num,
+                        "r2_score": r2_score(y_test, y_pred_vqr),
+                        "mae": mean_absolute_error(y_test, y_pred_vqr),
+                        "mse": mean_squared_error(y_test, y_pred_vqr),
+                        "rmse": root_mean_squared_error(y_test, y_pred_vqr),
+                    }
+                )
+        else:
+            print("Fail")
+            return
 
         # Export Error Benchmark Data
         df_results = pd.DataFrame(results_list)
@@ -317,25 +341,121 @@ def benchmark_plots(csv_path: str) -> None:
         plt.show()
 
 
+def benchmark_plots_v2(csv_path_xgb: str, csv_path_vqr: str) -> None:
+    """
+    Read benchmark CSV and generate independent line plots for each error metric.
+    """
+    if not os.path.exists(csv_path_xgb):
+        print(f"[ERROR] This Path doesn't exis: '{csv_path_xgb}'")
+        return
+    if not os.path.exists(csv_path_vqr):
+        print(f"[ERROR] This Path doesn't exis: '{csv_path_vqr}'")
+        return
+
+    df_xgb = pd.read_csv(csv_path_xgb)
+    df_vqr = pd.read_csv(csv_path_vqr)
+
+    plot_style()
+    # columns = 3
+    # rows = len(error_metrics) // columns + 1
+
+    # fig, axes = plt.subplots(rows, columns, figsize=(6 * rows, 4 * columns))
+
+    # axes = np.array(axes).flatten()
+
+    # for ax, metric in zip(axes, error_metrics):
+    for metric in error_metrics:
+
+        # plt.figure(figsize=(9, 5.5))
+
+        # ax.plot(
+        #     df_xgb["feature_number"],
+        #     df_xgb[metric],
+        #     marker="o",
+        #     linewidth=2,
+        #     color="#d62728",
+        #     label="XGBoost",
+        # )
+
+        # ax.plot(
+        #     df_vqr["feature_number"],
+        #     df_vqr[metric],
+        #     marker="s",
+        #     linewidth=2,
+        #     linestyle="--",
+        #     color="#1f77b4",
+        #     label="VQR",
+        # )
+
+        # metric_title = metric.replace("_", " ").upper()
+        # ax.set_title(
+        #     f"{metric_title}",
+        #     fontsize=13,
+        #     fontweight="bold",
+        #     pad=15,
+        # )
+        # ax.set_xlabel("k", fontsize=11, fontweight="semibold")
+        # ax.set_ylabel(metric_title, fontsize=11, fontweight="semibold")
+
+        # ax.set_xticks(k_ticks)
+        # ax.legend(frameon=True, facecolor="white", edgecolor="#101010", fontsize=10)
+        # ax.tight_layout()
+        plt.plot(
+            df_xgb["feature_number"],
+            df_xgb[metric],
+            marker="o",
+            linewidth=2,
+            color="#d62728",
+            label="XGBoost",
+        )
+
+        plt.plot(
+            df_vqr["feature_number"],
+            df_vqr[metric],
+            marker="s",
+            linewidth=2,
+            linestyle="--",
+            color="#1f77b4",
+            label="VQR",
+        )
+
+        metric_title = metric.replace("_", " ").upper()
+        plt.title(
+            f"{metric_title}",
+            fontsize=13,
+            fontweight="bold",
+            pad=15,
+        )
+        plt.xlabel("k", fontsize=11, fontweight="semibold")
+        plt.ylabel(metric_title, fontsize=11, fontweight="semibold")
+
+        plt.legend(frameon=True, facecolor="white", edgecolor="#101010", fontsize=10)
+        plt.tight_layout()
+
+        plt.show()
+
+
 # ==========================================================================
 # MAIN EXECUTION ENTRYPOINT
 # ==========================================================================
 
 
 def main():
-    X_train, y_train, X_test, y_test = create_food_sample(n_sample=sample_number)
+
+    global X_train, X_test, y_train, y_test
+
     if is_scale_x:
         X_train, X_test = feature_scaler(X_train, X_test)
     if is_scale_y:
         y_train, y_test = y_feature_scaler(y_train, y_test)
 
-    benchmark_error(
-        X_train_all=X_train,
-        y_train=y_train,
-        X_test_all=X_test,
-        y_test=y_test,
-    )
-    # benchmark_plots(error_benchmark_result_path)
+    # benchmark_error(
+    #     X_train=X_train,
+    #     y_train=y_train,
+    #     X_test=X_test,
+    #     y_test=y_test,
+    # )
+    benchmark_plots_v2(xgboost_bm_data_path, vqr_bm_data_path)
 
 
 if __name__ == "__main__":

@@ -87,6 +87,12 @@ REGIONAL_WAREHOUSE_PATH_FEATURE = os.path.join(
     FEATURE_ENGINEERING_DATA_PATH, "regional_warehouse.csv"
 )
 
+# Perishable Goods data
+PERISHABLE_GOODS_DATA_PATH = os.path.join(
+    FEATURE_ENGINEERING_DATA_PATH, "perishable_goods_data.csv"
+)
+
+
 # ==========================================================================
 # Benchmark Data Path | Optimize result path
 # ==========================================================================
@@ -97,6 +103,8 @@ VQR_TRAIN_RESULT = os.path.join(TRAINING_EVA_RESULT, "vqr.csv")
 # ==========================================================================
 # Benchmark Data Path | Optimize result path
 # ==========================================================================
+
+PERISHABLE_GOODS_BM = os.path.join(BENCHMARK, "perishable_bm")
 
 # ==========================================================================
 # REFRESH ACCESS KEY

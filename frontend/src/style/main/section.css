@@ -8,6 +8,10 @@
     background: var(--surface);
 }
 
+.section--safety {
+    background: var(--safety);
+}
+
 .section--dark {
     background: var(--ink);
 }

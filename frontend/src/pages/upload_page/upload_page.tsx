@@ -1,7 +1,10 @@
-import "../../style/main/section.css";
-import "../../style/elements/card.css";
+import "../../style/main/section.css"
+import "../../style/elements/card.css"
+import "../../style/elements/button.css"
+import '../../style/index.css'
 import { Warehouse } from "./warehouse"
 import { HeroUpload } from "./hero_upload"
+import { Product } from './product'
 
 const Upload = () => {
     return (
@@ -9,6 +12,7 @@ const Upload = () => {
             <HeroUpload />
 
             <Warehouse />
+            <Product />
             <section className="section section--dark">
 
             </section>

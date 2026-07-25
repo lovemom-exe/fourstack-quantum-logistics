@@ -1,12 +1,14 @@
 import { useState } from 'react';
 
+
+
 const Warehouse = () => {
     const form_style: React.CSSProperties = {
         display: "grid",
         gridTemplateColumns: '120px 1fr',
         gap: '16px',
         maxWidth: '1000px',
-        padding: '20px',
+        padding: '10px',
     };
     const label_style: React.CSSProperties = {
         display: 'flex',
@@ -24,14 +26,15 @@ const Warehouse = () => {
     };
 
     return (
-        <section className="section">
+        <section className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div className="section__inner">
                 <div className="section__header section__left">
                     <p className="section__eyebrow">// Forecast Your Customer Demand</p>
-                    <p className="section__title">YOUR WAREHOUSE DATA</p>
+                    <p className="section__title" style={{ fontSize: "70px", color: "var(--safety)", fontWeight: "bold" }}>YOUR WAREHOUSE DATA</p>
                     <div className="section__header">
                         Insert Your New Warehouse Data
                     </div>
+                    <button className="">Save</button>
                 </div>
                 <div className="section__left ">
                     <form style={form_style}>
@@ -120,7 +123,7 @@ export default function OperatingDays() {
                                 style={{
                                     ...tickBox,
                                     backgroundColor: checked
-                                        ? 'black'
+                                        ? 'var(--safety)'
                                         : 'transparent',
                                     color: 'white',
                                     fontSize: '17px',

@@ -115,7 +115,7 @@ feature_list_index = [
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
 ]
 
-sample_number = 100
+sample_number = 200
 is_scale_x = True
 is_scale_y = True
 
@@ -132,10 +132,10 @@ elif not is_scale_x and not is_scale_y:
     scale_name_path = "non"
 
 xgboost_score_path = os.path.join(
-    PERISHABLE_GOODS_BM, f"xgboost/score_{sample_number}s_{scale_name_path}_new.csv"
+    PERISHABLE_GOODS_BM, f"xgboost/score_{sample_number}s_{scale_name_path}.csv"
 )
 vqr_score_path = os.path.join(
-    PERISHABLE_GOODS_BM, f"vqr/score_{sample_number}s_{scale_name_path}_new_1.csv"
+    PERISHABLE_GOODS_BM, f"vqr/score_{sample_number}s_{scale_name_path}.csv"
 )
 export_data_path = vqr_score_path
 

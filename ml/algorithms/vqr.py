@@ -28,6 +28,7 @@ def vqr(
     maxiter: int = 100,
     initial_point: np.ndarray | None = None,
     callback: Callable[[np.ndarray, float], None] | None = None,
+    precision: float | None = None,
 ) -> VQR | None:
     """Build Variational Quantum Regressor Model
 
@@ -47,6 +48,17 @@ def vqr(
             multiple random restarts and pick the best by validation loss.
         callback: Optional ``(weights, objective_value)`` callback forwarded to
             VQR so training progress can be observed.
+        precision: Expectation-value precision for the underlying
+            ``EstimatorQNN``. Leave ``None`` to keep qiskit-machine-learning's
+            default of ``0.015625``.
+
+            IMPORTANT: that default is NOT exact. ``EstimatorQNN`` calls
+            ``estimator.run(..., precision=0.015625)``, which overrides a
+            ``StatevectorEstimator``'s own ``default_precision=0.0`` and makes it
+            inject sampled noise (~4096 shots). With an unseeded estimator the
+            objective is then random on every evaluation, so two identical runs
+            diverge and results are not reproducible. Pass ``precision=0.0`` for
+            an exact, deterministic statevector objective.
 
     Returns:
         VQR | None
@@ -78,6 +90,16 @@ def vqr(
         initial_point=initial_point,
         callback=callback,
     )
+
+    # VQR builds its EstimatorQNN internally and never exposes the precision,
+    # and `default_precision` is a read-only property - so the backing field is
+    # the only way in. Asserted so a library change can't silently drop this.
+    if precision is not None:
+        model.neural_network._default_precision = precision
+        assert model.neural_network.default_precision == precision, (
+            "Could not set EstimatorQNN precision; qiskit-machine-learning may "
+            "have changed its internals."
+        )
 
     # Fit Data
     model.fit(X_train, Y_train)

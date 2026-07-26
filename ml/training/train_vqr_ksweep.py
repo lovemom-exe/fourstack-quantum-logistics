@@ -1,6 +1,20 @@
 # ==========================================================================
 # Author: Nguyen Minh Hoang
-# Purpose: PART C - VQR at k = 4, 6, 8 qubits, scored on the SHARED 10k test set.
+# Purpose: PART C - VQR at k = 4..8 qubits, scored on the SHARED 10k test set.
+#
+#          EXACT PROTOCOL (precision = 0.0). Earlier runs of this file were NOT
+#          exact: EstimatorQNN defaults to default_precision=0.015625 and passes
+#          it to estimator.run(), so even a local StatevectorEstimator injected
+#          sampled noise (~4096 shots) with no seed. Consequences measured:
+#            - two identical runs disagreed (132 vs 159 evals, obj 0.238 vs 0.220)
+#            - COBYLA stopped early on FALSE convergence; at precision=0.0 the
+#              same fit runs to the cap and is bit-for-bit reproducible
+#          The noisy-protocol results are kept in vqr_ksweep_results.csv for
+#          comparison; this file writes vqr_ksweep_exact_results.csv instead.
+#
+#          RESUMABLE: a run is identified by (k, maxiter, precision), so the same
+#          k under a different optimizer budget is a new experiment rather than a
+#          duplicate, and finished work is never re-run or overwritten.
 #
 #          Everything except k is frozen to the Part-A configuration:
 #          zz_feature_map(k, reps=2), real_amplitudes(k, reps=3),
@@ -73,16 +87,63 @@ from utils.path import TRAINING_EVA_RESULT
 # ==========================================================================
 # PARAMETERS
 # ==========================================================================
-K_GRID_VQR = [4, 6, 8]
+K_GRID_VQR = [4, 5, 6, 7, 8]
 N_SAMPLE = 1000              # -> 800 train / 200 validation
 PROBE_ROWS = 200             # rows used only for the per-k runtime estimate
-RESULTS_JSON = os.path.join(TRAINING_EVA_RESULT, "vqr_ksweep_results.json")
-RESULTS_CSV = os.path.join(TRAINING_EVA_RESULT, "vqr_ksweep_results.csv")
+
+# Expectation-value precision for the EstimatorQNN.
+#
+# 0.0 = exact statevector. This is NOT the library default: EstimatorQNN ships
+# with default_precision=0.015625 and passes it to estimator.run(), which makes
+# even a StatevectorEstimator inject sampled noise (~4096 shots). With an
+# unseeded estimator that objective is random on every evaluation, so runs are
+# not reproducible AND COBYLA terminates early on false convergence. Measured:
+# two identical runs gave 132 vs 159 evals; at precision=0.0 they are identical.
+PRECISION = 0.0
+
+# Everything is keyed on (k, maxiter, precision), so two optimizer budgets or
+# two precisions can live side by side and be compared instead of overwriting
+# each other. The tag keeps the two families in separate files.
+PROTOCOL_TAG = "exact" if PRECISION == 0.0 else "noisy"
+
+RESULTS_JSON = os.path.join(
+    TRAINING_EVA_RESULT, f"vqr_ksweep_{PROTOCOL_TAG}_results.json")
+RESULTS_CSV = os.path.join(
+    TRAINING_EVA_RESULT, f"vqr_ksweep_{PROTOCOL_TAG}_results.csv")
 
 
 # ==========================================================================
 # CORE LOGIC & FUNCTIONS
 # ==========================================================================
+def run_key(row: dict) -> tuple:
+    """Identity of a scored run: same k under a different optimizer budget or a
+    different precision is a DIFFERENT experiment, not a duplicate."""
+    return (int(row["k"]), int(row["maxiter"]), float(row["precision"]))
+
+
+def load_completed() -> list[dict]:
+    """Rows for k's already scored, so a rerun never repeats finished work.
+
+    The JSON is the source of truth (it keeps restart_objectives/restart_evals as
+    real dicts); the CSV is only a fallback, where those two columns come back as
+    strings. Either way the stored row is carried through verbatim - this
+    function never recomputes anything.
+    """
+    if os.path.exists(RESULTS_JSON):
+        with open(RESULTS_JSON) as fh:
+            rows = json.load(fh)
+        # JSON turns the seed keys into strings; put them back so a reloaded row
+        # is written out byte-identically to how it was first saved.
+        for r in rows:
+            for col in ("restart_objectives", "restart_evals"):
+                if isinstance(r.get(col), dict):
+                    r[col] = {int(s): v for s, v in r[col].items()}
+        return rows
+    if os.path.exists(RESULTS_CSV):
+        return pd.read_csv(RESULTS_CSV).to_dict("records")
+    return []
+
+
 def prepare(k: int, X_test_pool: np.ndarray) -> dict:
     """Build the frozen train/val split for a given k and map the shared test set."""
     X_train_raw, y_train_raw, _, _ = create_food_sample(
@@ -117,8 +178,15 @@ def prepare(k: int, X_test_pool: np.ndarray) -> dict:
     }
 
 
-def fit_once(X_tr, y_tr_scaled, k: int, seed: int, maxiter: int, verbose: bool = True):
-    """One seeded VQR restart on the LOCAL statevector estimator."""
+def fit_once(X_tr, y_tr_scaled, k: int, seed: int, maxiter: int, verbose: bool = True,
+             precision: float | None = None):
+    """One seeded VQR restart on the LOCAL statevector estimator.
+
+    ``precision`` defaults to the module's PRECISION; vqr_noise_floor.py overrides
+    it to reproduce the old noisy protocol.
+    """
+    if precision is None:
+        precision = PRECISION
     n_params = real_amplitudes(num_qubits=k, reps=ANSATZ_REPS).num_parameters
     rng = np.random.default_rng(seed)
     initial_point = rng.uniform(-np.pi, np.pi, size=n_params)
@@ -139,6 +207,7 @@ def fit_once(X_tr, y_tr_scaled, k: int, seed: int, maxiter: int, verbose: bool =
         maxiter=maxiter,
         initial_point=initial_point,
         callback=_cb,
+        precision=precision,
     )
     if model is None:
         raise RuntimeError(f"VQR training returned None for k={k}.")
@@ -161,11 +230,16 @@ def estimate_runtime(data: dict, k: int) -> float:
 
 
 def persist(model, data: dict, seed: int, k: int) -> str:
-    """Save weights + every fitted transform immediately after selection."""
+    """Save weights + every fitted transform immediately after selection.
+
+    Filenames carry the protocol and the optimizer budget, so an exact run never
+    silently overwrites the artifacts of a run made under different settings.
+    """
     os.makedirs(TRAINING_EVA_RESULT, exist_ok=True)
-    np.save(os.path.join(TRAINING_EVA_RESULT, f"vqr_weights_k{k}.npy"),
+    stem = f"vqr_{PROTOCOL_TAG}_m{MAXITER}_k{k}"
+    np.save(os.path.join(TRAINING_EVA_RESULT, f"{stem}_weights.npy"),
             np.asarray(model.weights))
-    bundle = os.path.join(TRAINING_EVA_RESULT, f"vqr_artifacts_k{k}.joblib")
+    bundle = os.path.join(TRAINING_EVA_RESULT, f"{stem}_artifacts.joblib")
     joblib.dump(
         {
             "k": k, "seed": seed, "weights": np.asarray(model.weights),
@@ -173,6 +247,7 @@ def persist(model, data: dict, seed: int, k: int) -> str:
             "y_scaler": data["y_scaler"], "selected": data["selected"],
             "clip_threshold": data["clip"], "pool_names": POOL_NAMES,
             "feature_map_reps": FEATURE_MAP_REPS, "ansatz_reps": ANSATZ_REPS,
+            "maxiter": MAXITER, "precision": PRECISION,
         },
         bundle,
     )
@@ -224,6 +299,7 @@ def run_k(k: int, X_test_pool: np.ndarray, y_test_raw: np.ndarray) -> dict:
 
     row = {
         "model": "VQR", "n_train": len(data["y_tr_scaled"]), "k": k,
+        "maxiter": MAXITER, "precision": PRECISION,
         "r2_real": r2(y_test_raw, pred_real), "r2_log": r2(y_test_log, pred_log),
         "mae": mae(y_test_raw, pred_real), "rmse": rmse(y_test_raw, pred_real),
         "mape": mape(y_test_raw, pred_real),
@@ -285,17 +361,31 @@ def main() -> None:
     print(f"[SETUP] VQR k-sweep {K_GRID_VQR}, maxiter={MAXITER}, seeds={RESTART_SEEDS}")
     print(f"[SETUP] scored on the shared {TEST_N:,}-row test set")
     print("[SETUP] estimator = StatevectorEstimator (LOCAL) - ZERO QuApp cloud calls")
+    print(f"[SETUP] protocol = {PROTOCOL_TAG.upper()}, EstimatorQNN precision="
+          f"{PRECISION} "
+          f"({'exact statevector, reproducible' if PRECISION == 0.0 else 'SAMPLED NOISE'})")
+    print(f"[SETUP] results -> {os.path.basename(RESULTS_CSV)}")
+
+    rows: list[dict] = load_completed()
+    done = {run_key(r) for r in rows}
+    todo = [k for k in K_GRID_VQR
+            if (k, MAXITER, PRECISION) not in done]
+    print(f"[RESUME] already scored (k,maxiter,precision): "
+          f"{sorted(done) or 'none'} -> skipped")
+    print(f"[RESUME] to run this session: {todo or 'nothing'}")
+    if not todo:
+        print("[RESUME] every k in the grid is already done; nothing to train.")
 
     X_test_pool, y_test_raw = build_test_set()
 
-    rows: list[dict] = []
-    for k in K_GRID_VQR:
+    for k in todo:
         rows.append(run_k(k, X_test_pool, y_test_raw))
+        rows.sort(key=run_key)
         # incremental save so a long run never loses completed work
         with open(RESULTS_JSON, "w") as fh:
             json.dump(rows, fh, indent=2)
         pd.DataFrame(rows).to_csv(RESULTS_CSV, index=False)
-        print(f"[SAVE] progress written ({len(rows)}/{len(K_GRID_VQR)} done)")
+        print(f"[SAVE] progress written ({len(rows)}/{len(K_GRID_VQR)} k's on file)")
 
     print("=" * 100)
     print(f"PART C - VQR vs qubit count, shared {TEST_N:,}-row test set")
@@ -305,18 +395,22 @@ def main() -> None:
     print("-" * 100)
     for r in rows:
         cap = "YES" if r["hit_cap_any"] else "no"
-        evals = ",".join(str(v) for v in r["restart_evals"].values())
+        ev = r["restart_evals"]
+        evals = (",".join(str(v) for v in ev.values())
+                 if isinstance(ev, dict) else str(ev))
         print(f"{r['k']:>3}{r['r2_real']:>12.4f}{r['r2_log']:>11.4f}{r['mae']:>10.4f}"
               f"{r['rmse']:>10.4f}{r['std_ratio_real']:>11.4f}{r['r_real']:>8.4f}"
               f"{evals + ' (' + cap + ')':>14}")
     print("=" * 100)
 
     p1 = plot_vs_xgb(rows, "r2_real", "R² (real units)",
-                     f"VQR vs XGBoost — R² (real) by k, shared {TEST_N:,}-row test set",
-                     "vqr_vs_xgb_r2_real.png")
+                     f"VQR ({PROTOCOL_TAG}) vs XGBoost — R² (real) by k, "
+                     f"shared {TEST_N:,}-row test set",
+                     f"vqr_vs_xgb_{PROTOCOL_TAG}_r2_real.png")
     p2 = plot_vs_xgb(rows, "r2_log", "R² (log space)",
-                     f"VQR vs XGBoost — R² (log) by k, shared {TEST_N:,}-row test set",
-                     "vqr_vs_xgb_r2_log.png")
+                     f"VQR ({PROTOCOL_TAG}) vs XGBoost — R² (log) by k, "
+                     f"shared {TEST_N:,}-row test set",
+                     f"vqr_vs_xgb_{PROTOCOL_TAG}_r2_log.png")
 
     print(f"[DONE] results : {RESULTS_CSV}")
     print(f"[DONE] plot    : {p1}")

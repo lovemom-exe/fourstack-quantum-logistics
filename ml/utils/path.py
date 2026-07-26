@@ -22,6 +22,13 @@ BENCHMARK = os.path.join(ROOT_PATH, "evaluation/benchmark_data")
 # Training/evaluation_result
 TRAINING_EVA_RESULT = os.path.join(ROOT_PATH, "training/evaluation_result")
 
+# Reusable model-training output paths
+RESULTS_PATH = os.path.join(ROOT_PATH, "results")
+MODELS_PATH = os.path.join(ROOT_PATH, "models")
+PERISHABLE_VQR_MODEL_PATH = os.path.join(MODELS_PATH, "perishable_vqr")
+VQR_EXPERIMENT_RESULTS_PATH = os.path.join(RESULTS_PATH, "vqr_experiments.csv")
+VQR_LOSS_HISTORY_PATH = os.path.join(RESULTS_PATH, "vqr_loss_history.csv")
+
 # Raw data path
 RAW_DATA_PATH = os.path.join(DATA_PATH, "raw")
 # Processed data path

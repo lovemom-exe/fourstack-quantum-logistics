@@ -145,17 +145,93 @@ validation, n_train = 800 (1.000 trừ 20% validation), cùng cách xử lý tar
 | k (qubit) | tham số | R²(real) | R²(log) | MAE | RMSE | std ratio | r | evals (chạm trần 300?) |
 |---:|---:|---:|---:|---:|---:|---:|---:|---|
 | 4 | 16 | **−0,1059** | −0,4519 | 1,0737 | 2,1557 | 0,2776 | **−0,0408** | 165/192/154 — không |
-| 6 | 24 | *đang chạy* | | | | | | |
-| 8 | 32 | *đang chạy* | | | | | | |
+| 5 | 20 | −0,0385 | −0,4126 | 1,0820 | 2,0890 | 0,2172 | 0,0603 | 204/208/263 — không |
+| 6 | 24 | −0,0413 | −0,4683 | 1,1256 | 2,0918 | 0,1169 | 0,0229 | 269/236/**300** — **có** |
+| 7 | 28 | **−0,0307** | **−0,2932** | 1,0005 | 2,0811 | 0,2179 | 0,0438 | 272/**300**/**300** — **có** |
 
-Objective 3 restart tại k=4: `{seed 0: 0,204808, seed 1: 0,189893, seed 2: 0,216478}`
-→ chọn seed 1 theo validation MSE.
+Objective 3 restart (chọn theo validation MSE, **không bao giờ theo test**):
 
-**Nhận xét k=4:** R² âm và **r ≈ −0,04**, tức mô hình gần như **không có tương quan**
-với thực tế — VQR ở 4 qubit chưa học được gì đáng kể. So sánh: XGBoost cùng giao thức Q,
-cùng k=4 đạt R² 0,0909.
+| k | seed 0 | seed 1 | seed 2 | seed được chọn |
+|---:|---:|---:|---:|---:|
+| 4 | 0,204808 | 0,189893 | 0,216478 | 1 |
+| 5 | 0,264639 | 0,247298 | 0,236148 | 2 |
+| 6 | 0,262426 | 0,259183 | 0,243764 | 2 |
+| 7 | 0,240031 | 0,240659 | 0,250418 | 0 |
 
-Model đã lưu: `vqr_weights_k4.npy`, `vqr_artifacts_k4.joblib`.
+Thời gian train (StatevectorEstimator cục bộ, 3 restart mỗi k): k=5 ≈ **26,1 phút**,
+k=7 ≈ **64,9 phút**. Tổng phiên bổ sung 93,6 phút. k=4 và k=6 được **skip**, đọc lại
+từ `vqr_ksweep_results.json` nên số cũ không bị chạy lại hay ghi đè.
+
+### Diễn giải
+
+- **k=4 là điểm tệ nhất** và là điểm duy nhất có **r âm** (−0,0408): mô hình gần như
+  không tương quan với thực tế. So sánh: XGBoost cùng giao thức Q, cùng k=4 đạt 0,0909.
+- **Toàn bộ 4 điểm đều có R² âm** ở cả đơn vị thật lẫn không gian log. Nghĩa là ở mọi
+  k đã đo, VQR vẫn **thua baseline đoán trung bình**.
+- **Xu hướng KHÔNG đơn điệu.** R²(real) đi −0,1059 → −0,0385 → −0,0413 → −0,0307:
+  tăng mạnh từ k=4→5 rồi **gãy tại k=6** (giảm nhẹ), sau đó tăng lại. R²(log) gãy
+  cùng chỗ, còn rõ hơn: −0,4519 → −0,4126 → −0,4683 → −0,2932. Biên độ dao động (~0,01 ở real,
+  ~0,06 ở log) **cùng cỡ với khoảng cách giữa các điểm**, nên phần lớn "xu hướng" ở
+  đây có thể chỉ là nhiễu tối ưu hoá.
+- **Ngân sách tối ưu hoá đã chạm trần từ k=6.** k=4 và k=5 hội tụ trong 154–263 evals,
+  nhưng k=6 và k=7 có restart chạm đúng trần `maxiter=300`. Tức là từ k≥6, **COBYLA bị
+  cắt giữa chừng chứ không phải hội tụ** — số của k=6 và k=7 là cận dưới, và một phần
+  hình dạng đường cong phản ánh ngân sách tối ưu hoá chứ không chỉ sức biểu diễn của
+  mạch. Muốn kết luận sạch về scaling thì phải nới `maxiter` trước.
+- **std ratio 0,12–0,28** ở mọi k: mô hình co mạnh về trung bình, giống toàn bộ các
+  model khác trong file này.
+
+Model đã lưu: `vqr_weights_k{4,5,6,7}.npy`, `vqr_artifacts_k{4,5,6,7}.joblib`.
+
+---
+
+## 5b. Dự phóng scaling — ⚠️ NGOẠI SUY, KHÔNG PHẢI SỐ ĐO
+
+Biểu đồ: `ml/training/evaluation_result/vqr_trend_r2_real.png` ·
+`ml/training/evaluation_result/vqr_trend_r2_log.png`
+(sinh bởi `ml/training/plot_vqr_trend.py`)
+
+**Ranh giới đo thật / dự phóng:**
+
+| | Phần ĐO THẬT | Phần DỰ PHÓNG |
+|---|---|---|
+| Khoảng k | **k = 4, 5, 6, 7** | k > 7, kéo tới k = 12 |
+| Nguồn | `vqr_ksweep_results.csv` — chạy thật, test set 10.000 dòng | `np.polyfit` bậc 1 trên đúng 4 điểm đo |
+| Cách vẽ | marker vuông, nét liền, màu đậm | nét đứt, màu nhạt, kèm dải ±1 s.e. dự báo |
+| Được dùng làm gì | kết quả benchmark, trích dẫn được | **chỉ là phép ngoại suy — không trích dẫn như số đo** |
+
+**Kết quả fit tuyến tính:**
+
+| Chỉ số | Hệ số góc / k | Chặn | std phần dư | Cắt y=0 tại | Giá trị dự phóng tại k=12 |
+|---|---:|---:|---:|---:|---:|
+| R²(real) | +0,02229 | −0,17669 | 0,0240 | **k ≈ 7,9** | +0,0908 ± 0,0748 |
+| R²(log) | +0,04203 | −0,63768 | 0,0704 | không cắt tới k=12 | −0,1333 ± 0,2192 |
+
+### Giả định của phép ngoại suy — và vì sao nên nghi ngờ nó
+
+Con số "k ≈ 7,9" **chỉ đúng nếu tất cả các giả định sau đều đúng**:
+
+1. **Xu hướng tiếp tục tuyến tính** ngoài khoảng đã đo. Chưa có gì bảo đảm; các đường
+   cong k-sweep của XGBoost ở mục 4 **bão hoà sau k≈6–8** chứ không tăng tuyến tính.
+   Nếu VQR bão hoà giống vậy thì đường dự phóng sai hẳn.
+2. **Giữ nguyên ansatz/optimizer/ngân sách**: `real_amplitudes(reps=3)`,
+   `COBYLA(maxiter=300)`, 3 restart, n_train = 800. Số tham số tăng tuyến tính theo k
+   (4k), nên ở k lớn hơn **maxiter=300 sẽ càng thiếu** — mà k=6 và k=7 đã chạm trần rồi.
+   Giả định này gần như chắc chắn **vỡ** trước k=12.
+3. **Fit chỉ dựa trên 4 điểm, dof = 2**, trong đó dãy đo **không đơn điệu** (gãy tại
+   k=6). Dải ±1 s.e. tại k=12 đã rộng ±0,075 (real) và ±0,219 (log) — riêng dải bất
+   định ở log đã **rộng hơn toàn bộ khoảng biến thiên đo được**.
+4. **Bỏ qua barren plateau.** Mạch biến phân sâu hơn/rộng hơn thường **khó tối ưu hơn**,
+   không dễ hơn. Ngoại suy tuyến tính giả định ngầm điều ngược lại.
+
+> ⚠️ **Không được trình bày "VQR đạt R² ≥ 0 tại k ≈ 8" như một kết quả.** Đó là điểm
+> cắt của một đường thẳng fit qua 4 điểm âm, chưa có một phép đo nào ở k ≥ 8 xác nhận.
+> Cách phát biểu trung thực: *"trong khoảng k=4..7 đã đo, R² tăng dần nhưng vẫn âm ở
+> mọi k; nếu xu hướng tuyến tính tiếp diễn — điều chưa được kiểm chứng — thì mốc hoà
+> vốn với baseline rơi vào khoảng k≈8."*
+
+**Cách kiểm chứng:** chạy thật k=8 (và k=9) với `maxiter` nới rộng đủ để không chạm
+trần. Nếu k=8 rơi ra ngoài dải bất định, giả định tuyến tính bị bác bỏ.
 
 ---
 
@@ -169,9 +245,10 @@ Model đã lưu: `vqr_weights_k4.npy`, `vqr_artifacts_k4.joblib`.
    là mất sạch, phải train lại từ đầu. Đã bổ sung `_persist()` — từ nay mọi run VQR đều
    lưu weights + selector + 2 scaler + clip threshold ngay sau khi chọn restart.
 
-3. **VQR chưa vượt được classical.** Ở k=4, VQR có R² âm (−0,1059) và r ≈ 0, thua rõ
-   XGBoost cùng điều kiện (0,0909). Chưa có bằng chứng nào cho thấy lợi thế lượng tử
-   trên bài toán này ở quy mô hiện tại.
+3. **VQR chưa vượt được classical ở bất kỳ k nào đã đo.** Cả 4 điểm k=4,5,6,7 đều có
+   R² âm (−0,1059 … −0,0307), tức thua cả baseline đoán trung bình, và thua rõ XGBoost
+   cùng giao thức Q. Chưa có bằng chứng nào cho thấy lợi thế lượng tử trên bài toán này
+   ở quy mô hiện tại. Mốc "hoà vốn k≈8" ở mục 5b là **ngoại suy, không phải số đo**.
 
 4. **Chưa có feature trễ (lag).** Toàn bộ feature hiện tại là lịch/thời tiết/khuyến mãi
    của **chính ngày cần dự báo**, không có doanh số các ngày trước. Vì vậy đây là bài
@@ -193,17 +270,31 @@ Model đã lưu: `vqr_weights_k4.npy`, `vqr_artifacts_k4.joblib`.
 7. **Chưa đo lại bản "full"** (có cột stockout cùng ngày) trong phiên này; con số 0,2976
    trích từ run trước.
 
+8. **Ngân sách optimizer chạm trần từ k=6.** `COBYLA(maxiter=300)` bị cắt giữa chừng ở
+   k=6 và k=7 (có restart dừng đúng 300 evals). Số của hai k này là **cận dưới**, và
+   chưa tách được đâu là giới hạn của mạch, đâu là giới hạn của ngân sách tối ưu hoá.
+   Muốn quét k cao hơn thì phải nới `maxiter` trước, nếu không mọi kết luận về scaling
+   đều lẫn hai hiệu ứng.
+
+9. **Chưa đo k ≥ 8 cho VQR.** Lưới hiện tại dừng ở k=7. Mọi phát biểu về k=8..12
+   (mục 5b) là ngoại suy từ 4 điểm, chưa có phép đo nào xác nhận.
+
 ---
 
 ## Phụ lục — file kết quả
 
-**Model đã lưu:** `protocol_p_xgboost.joblib` · `vqr_weights_k4.npy` ·
-`vqr_artifacts_k4.joblib`
+**Model đã lưu:** `protocol_p_xgboost.joblib` ·
+`vqr_weights_k4.npy` · `vqr_weights_k5.npy` · `vqr_weights_k6.npy` · `vqr_weights_k7.npy` ·
+`vqr_artifacts_k4.joblib` · `vqr_artifacts_k5.joblib` · `vqr_artifacts_k6.joblib` ·
+`vqr_artifacts_k7.joblib`
 
 **Bảng số:** `ablation_winsorize.csv` · `ksweep_results.csv` ·
-`vqr_ksweep_results.csv` · `protocol_p_metrics.json` · `demo_error_stats.json`
+`vqr_ksweep_results.csv` · `vqr_ksweep_results.json` · `protocol_p_metrics.json` ·
+`demo_error_stats.json`
 
 **Biểu đồ:** `ksweep_r2_real.png` · `ksweep_r2_log.png` ·
+`vqr_trend_r2_real.png` · `vqr_trend_r2_log.png` ·
+`vqr_vs_xgb_r2_real.png` · `vqr_vs_xgb_r2_log.png` ·
 `demo_actual_vs_pred_slice.png` · `demo_error_hist.png` · `demo_scatter.png`
 
 Tất cả nằm trong `ml/training/evaluation_result/`.

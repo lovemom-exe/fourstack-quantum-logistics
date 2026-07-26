@@ -34,7 +34,7 @@ const Warehouse = () => {
                     <div className="section__header">
                         Insert Your New Warehouse Data
                     </div>
-                    <button className="">Save</button>
+                    <button className=".btn btn--primary" style={{ width: "100px", height: "70px", fontSize: "30px", fontWeight: "bold", color: "var(--ink)", borderWidth: "4px", borderStyle: "solid" }}>Save</button>
                 </div>
                 <div className="section__left ">
                     <form style={form_style}>

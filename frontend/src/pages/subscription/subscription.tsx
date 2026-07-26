@@ -22,29 +22,28 @@ const Subscription = () => {
     return (
         <main>
             <section className="section" >
-                <p className="section__title">
+                <p className="section__eyebrow">// Select Your Subscription Plan </p>
+                <p className="section__title" style={{ fontSize: "80px", fontWeight: "bold" }}>
                     SUBSCRIPTION
                 </p>
                 <div style={layout_style}>
                     <SubBox
                         title="STARTER"
-                        subtitle="For individuals exploring demand forecasting."
+                        subtitle="For Warehouse Managers."
                         price="$800/month"
                         features={[
-                            "1 warehouse",
-                            "Up to 100 SKUs",
-                            "Basic demand forecasting",
-                            "7-day forecast",
-                            "Community support",
+                            "14-day forecast",
+                            "Weather-adjusted, zero tuning",
+                            "Stockout alerts before they hit",
                         ]}
                     />
                     <SubBoxBest
                         title="PROFESSIONAL"
-                        subtitle="For individuals exploring demand forecasting."
+                        subtitle="For Regional Chain Managers."
                         price="$2,500/month"
                         features={[
-                            "1 warehouse",
-                            "Up to 100 SKUs",
+                            "Everythings in STARTER",
+                            "Planners & procurement 30-day horizon",
                             "Basic demand forecasting",
                             "7-day forecast",
                             "Community support",
@@ -52,7 +51,7 @@ const Subscription = () => {
                     />
                     <SubBox
                         title="BUSINESS"
-                        subtitle="For individuals exploring demand forecasting."
+                        subtitle="For Third-party Logistics, National F&B and Grocery."
                         price="$60,000/Year"
                         features={[
                             "1 warehouse",
@@ -64,7 +63,7 @@ const Subscription = () => {
                     />
                     <SubBoxEnterPr
                         title="ENTERPRISE"
-                        subtitle="For individuals exploring demand forecasting."
+                        subtitle="For Multinationals & Medical Cold Chain."
                         price="$80,000/Year"
                         features={[
                             "1 warehouse",
@@ -89,12 +88,12 @@ export { Subscription };
 
 const title_style: React.CSSProperties = {
     margin: "0 0 8px",
-    fontSize: "24px",
+    fontSize: "30px",
     fontWeight: 700,
 };
 
 const subtitle_style: React.CSSProperties = {
-    minHeight: "44px",
+    minHeight: "60px",
     margin: "0 0 24px",
     fontSize: "14px",
     lineHeight: 1.5,

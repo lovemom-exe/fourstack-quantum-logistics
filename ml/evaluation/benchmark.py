@@ -109,13 +109,19 @@ feature_list = [
 ]
 feature_list_index = [
     [0, 1, 2],
+    [0, 1, 2, 3],
+    [0, 1, 2, 3, 4],
+    [0, 1, 2, 3, 4, 5],
     [0, 1, 2, 3, 4, 5, 6],
+    [0, 1, 2, 3, 4, 5, 6, 7],
     [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20, 21],
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20, 21, 22, 23],
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
 ]
 
-sample_number = 200
+sample_number = 100
 is_scale_x = True
 is_scale_y = True
 
@@ -137,7 +143,7 @@ xgboost_score_path = os.path.join(
 vqr_score_path = os.path.join(
     PERISHABLE_GOODS_BM, f"vqr/score_{sample_number}s_{scale_name_path}.csv"
 )
-export_data_path = vqr_score_path
+export_data_path = xgboost_score_path
 
 vqr_bm_data_path = vqr_score_path
 xgboost_bm_data_path = xgboost_score_path
@@ -165,7 +171,7 @@ def benchmark_error(
 ):
     results_list = []
 
-    for k in range(4, 5):
+    for k in range(0, 11):
         print("=" * 40)
         feature_num = len(feature_list_index[k])
         print(f"[{feature_num}] training:")
@@ -173,49 +179,49 @@ def benchmark_error(
         # X_train_k = selector.fit_transform(X_train_all, y_train)
         # X_test_k = selector.transform(X_test_all)
 
-        # print("XGBoost: ", end="")
-        # model_xgb = xgboost(X_train[:, feature_list_index[k]], y_train)
-        # if model_xgb is not None:
-        #     print("Done")
-        #     y_pred_xgb = model_xgb.predict(X_test[:, feature_list_index[k]])
-        #     results_list.append(
-        #         {
-        #             "model_name": "XGBoost",
-        #             "feature_number": feature_num,
-        #             "r2_score": r2_score(y_test, y_pred_xgb),
-        #             "mae": mean_absolute_error(y_test, y_pred_xgb),
-        #             "mse": mean_squared_error(y_test, y_pred_xgb),
-        #             "rmse": root_mean_squared_error(y_test, y_pred_xgb),
-        #         }
-        #     )
-        # else:
-        #     print("Fail")
-        #     return
-        # print("=" * 20)
-
-        print("VQR: ", end="")
-        model_vqr = vqr(
-            X_train[:, feature_list_index[k]],
-            y_train,
-            k=feature_num,
-        )
-        if model_vqr is not None:
+        print("XGBoost: ", end="")
+        model_xgb = xgboost(X_train[:, feature_list_index[k]], y_train)
+        if model_xgb is not None:
             print("Done")
-            if isinstance(X_test[:, feature_list_index[k]], np.ndarray):
-                y_pred_vqr = model_vqr.predict(X_test[:, feature_list_index[k]])
-                results_list.append(
-                    {
-                        "model_name": "VQR",
-                        "feature_number": feature_num,
-                        "r2_score": r2_score(y_test, y_pred_vqr),
-                        "mae": mean_absolute_error(y_test, y_pred_vqr),
-                        "mse": mean_squared_error(y_test, y_pred_vqr),
-                        "rmse": root_mean_squared_error(y_test, y_pred_vqr),
-                    }
-                )
+            y_pred_xgb = model_xgb.predict(X_test[:, feature_list_index[k]])
+            results_list.append(
+                {
+                    "model_name": "XGBoost",
+                    "feature_number": feature_num,
+                    "r2_score": r2_score(y_test, y_pred_xgb),
+                    "mae": mean_absolute_error(y_test, y_pred_xgb),
+                    "mse": mean_squared_error(y_test, y_pred_xgb),
+                    "rmse": root_mean_squared_error(y_test, y_pred_xgb),
+                }
+            )
         else:
             print("Fail")
             return
+        print("=" * 20)
+
+        # print("VQR: ", end="")
+        # model_vqr = vqr(
+        #     X_train[:, feature_list_index[k]],
+        #     y_train,
+        #     k=feature_num,
+        # )
+        # if model_vqr is not None:
+        #     print("Done")
+        #     if isinstance(X_test[:, feature_list_index[k]], np.ndarray):
+        #         y_pred_vqr = model_vqr.predict(X_test[:, feature_list_index[k]])
+        #         results_list.append(
+        #             {
+        #                 "model_name": "VQR",
+        #                 "feature_number": feature_num,
+        #                 "r2_score": r2_score(y_test, y_pred_vqr),
+        #                 "mae": mean_absolute_error(y_test, y_pred_vqr),
+        #                 "mse": mean_squared_error(y_test, y_pred_vqr),
+        #                 "rmse": root_mean_squared_error(y_test, y_pred_vqr),
+        #             }
+        #         )
+        # else:
+        #     print("Fail")
+        #     return
 
         # Export Error Benchmark Data
         df_results = pd.DataFrame(results_list)
